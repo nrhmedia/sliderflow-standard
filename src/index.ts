@@ -46,7 +46,13 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   const defaultSpeed = 1000; // Default speed for manual interactions
   const defaultAutoplayDelay = 5000; // Default autoplay delay
   const defaultSlidesPerView = 3; // Default slides per view
-  const defaultSpaceBetween = 16; // Default space between slides
+
+  // Define default space between slides for each breakpoint
+  const defaultSpaceBetweenDesktop = 16;
+  const defaultSpaceBetweenTablet = 12;
+  const defaultSpaceBetweenMobileLandscape = 8;
+  const defaultSpaceBetweenMobilePortrait = 0;
+
   const marqueeSpeed = 1; // Speed for marquee mode
 
   // Helper functions
@@ -57,11 +63,11 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     return defaultSlidesPerView;
   };
 
-  const getSpaceBetweenValue = (attr) => {
+  const getSpaceBetweenValue = (attr, defaultValue) => {
     const value = swiperElement.getAttribute(attr);
-    if (!value || value === 'default') return defaultSpaceBetween;
+    if (!value || value === 'default') return defaultValue;
     if (!isNaN(value)) return Number(value);
-    return defaultSpaceBetween;
+    return defaultValue;
   };
 
   const getSpeedValue = (attr) => {
@@ -213,10 +219,16 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   }
 
   const spaceBetweenSettings = {
-    desktop: getSpaceBetweenValue('swiperSpaceBetweenDesktop'),
-    tablet: getSpaceBetweenValue('swiperSpaceBetweenTablet'),
-    mobileLandscape: getSpaceBetweenValue('swiperSpaceBetweenMobileLandscape'),
-    mobilePortrait: getSpaceBetweenValue('swiperSpaceBetweenMobilePortrait'),
+    desktop: getSpaceBetweenValue('swiperSpaceBetweenDesktop', defaultSpaceBetweenDesktop),
+    tablet: getSpaceBetweenValue('swiperSpaceBetweenTablet', defaultSpaceBetweenTablet),
+    mobileLandscape: getSpaceBetweenValue(
+      'swiperSpaceBetweenMobileLandscape',
+      defaultSpaceBetweenMobileLandscape
+    ),
+    mobilePortrait: getSpaceBetweenValue(
+      'swiperSpaceBetweenMobilePortrait',
+      defaultSpaceBetweenMobilePortrait
+    ),
   };
 
   const speedSettings = {
