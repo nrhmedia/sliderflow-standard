@@ -45,7 +45,12 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
 
   const defaultSpeed = 1000; // Default speed for manual interactions
   const defaultAutoplayDelay = 5000; // Default autoplay delay
-  const defaultSlidesPerView = 3; // Default slides per view
+
+  // Define default slides per view for each breakpoint
+  const defaultSlidesPerViewDesktop = 4;
+  const defaultSlidesPerViewTablet = 3;
+  const defaultSlidesPerViewMobileLandscape = 2;
+  const defaultSlidesPerViewMobilePortrait = 1;
 
   // Define default space between slides for each breakpoint
   const defaultSpaceBetweenDesktop = 16;
@@ -56,11 +61,11 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   const marqueeSpeed = 1; // Speed for marquee mode
 
   // Helper functions
-  const getSlidesPerViewValue = (attr) => {
+  const getSlidesPerViewValue = (attr, defaultValue) => {
     const value = swiperElement.getAttribute(attr);
-    if (!value || value === 'default') return defaultSlidesPerView;
+    if (!value || value === 'default') return defaultValue;
     if (!isNaN(value) && Number(value) > 0) return Number(value);
-    return defaultSlidesPerView;
+    return defaultValue;
   };
 
   const getSpaceBetweenValue = (attr, defaultValue) => {
@@ -123,10 +128,16 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   };
 
   const slidesPerViewSettings = {
-    desktop: getSlidesPerViewValue('swiperSlidesPerViewDesktop'),
-    tablet: getSlidesPerViewValue('swiperSlidesPerViewTablet'),
-    mobileLandscape: getSlidesPerViewValue('swiperSlidesPerViewMobileLandscape'),
-    mobilePortrait: getSlidesPerViewValue('swiperSlidesPerViewMobilePortrait'),
+    desktop: getSlidesPerViewValue('swiperSlidesPerViewDesktop', defaultSlidesPerViewDesktop),
+    tablet: getSlidesPerViewValue('swiperSlidesPerViewTablet', defaultSlidesPerViewTablet),
+    mobileLandscape: getSlidesPerViewValue(
+      'swiperSlidesPerViewMobileLandscape',
+      defaultSlidesPerViewMobileLandscape
+    ),
+    mobilePortrait: getSlidesPerViewValue(
+      'swiperSlidesPerViewMobilePortrait',
+      defaultSlidesPerViewMobilePortrait
+    ),
   };
 
   // Determine the maximum slidesPerView value across breakpoints
@@ -412,7 +423,9 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
       dynamicBullets: dynamicBulletsSettings.mobilePortrait,
       renderBullet: bulletPaginationEl
         ? function (index, className) {
-            return `<button class="${className} ${extraBulletClasses.join(' ')} swiper-bullet-default is-standard"></button>`;
+            return `<button class="${className} ${extraBulletClasses.join(
+              ' '
+            )} swiper-bullet-default is-standard"></button>`;
           }
         : undefined,
       clickable: !!bulletPaginationEl,

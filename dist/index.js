@@ -41,17 +41,20 @@
     const cardsSlideShadowsAttribute = swiperElement.getAttribute("swiperEffectCardsSlideShadows");
     const defaultSpeed = 1e3;
     const defaultAutoplayDelay = 5e3;
-    const defaultSlidesPerView = 3;
+    const defaultSlidesPerViewDesktop = 4;
+    const defaultSlidesPerViewTablet = 3;
+    const defaultSlidesPerViewMobileLandscape = 2;
+    const defaultSlidesPerViewMobilePortrait = 1;
     const defaultSpaceBetweenDesktop = 16;
     const defaultSpaceBetweenTablet = 12;
     const defaultSpaceBetweenMobileLandscape = 8;
     const defaultSpaceBetweenMobilePortrait = 0;
     const marqueeSpeed = 1;
-    const getSlidesPerViewValue = (attr) => {
+    const getSlidesPerViewValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
-      if (!value || value === "default") return defaultSlidesPerView;
+      if (!value || value === "default") return defaultValue;
       if (!isNaN(value) && Number(value) > 0) return Number(value);
-      return defaultSlidesPerView;
+      return defaultValue;
     };
     const getSpaceBetweenValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
@@ -103,10 +106,16 @@
       return true;
     };
     const slidesPerViewSettings = {
-      desktop: getSlidesPerViewValue("swiperSlidesPerViewDesktop"),
-      tablet: getSlidesPerViewValue("swiperSlidesPerViewTablet"),
-      mobileLandscape: getSlidesPerViewValue("swiperSlidesPerViewMobileLandscape"),
-      mobilePortrait: getSlidesPerViewValue("swiperSlidesPerViewMobilePortrait")
+      desktop: getSlidesPerViewValue("swiperSlidesPerViewDesktop", defaultSlidesPerViewDesktop),
+      tablet: getSlidesPerViewValue("swiperSlidesPerViewTablet", defaultSlidesPerViewTablet),
+      mobileLandscape: getSlidesPerViewValue(
+        "swiperSlidesPerViewMobileLandscape",
+        defaultSlidesPerViewMobileLandscape
+      ),
+      mobilePortrait: getSlidesPerViewValue(
+        "swiperSlidesPerViewMobilePortrait",
+        defaultSlidesPerViewMobilePortrait
+      )
     };
     const maxSlidesPerView = Math.max(
       slidesPerViewSettings.desktop,
@@ -318,7 +327,9 @@
         type: bulletPaginationEl ? "bullets" : fractionPaginationEl ? "fraction" : progressPaginationEl ? "progressbar" : "custom",
         dynamicBullets: dynamicBulletsSettings.mobilePortrait,
         renderBullet: bulletPaginationEl ? function(index2, className) {
-          return `<button class="${className} ${extraBulletClasses.join(" ")} swiper-bullet-default is-standard"></button>`;
+          return `<button class="${className} ${extraBulletClasses.join(
+            " "
+          )} swiper-bullet-default is-standard"></button>`;
         } : void 0,
         clickable: !!bulletPaginationEl,
         renderFraction: fractionPaginationEl ? function(currentClass, totalClass) {
