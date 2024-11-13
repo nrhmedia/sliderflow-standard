@@ -8,10 +8,12 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   const defaultSlideStart = 'first';
   const defaultFillEmptySlots = true;
   const defaultEffect = 'slide';
+  const defaultRewind = true;
+  const defaultLoop = false;
 
   // Retrieve attributes or set to default if not provided or set to 'default'
-  const rewindAttribute = swiperElement.getAttribute('swiperRewind');
-  const loopAttribute = swiperElement.getAttribute('swiperLoop');
+  const rewindAttributeValue = swiperElement.getAttribute('swiperRewind');
+  const loopAttributeValue = swiperElement.getAttribute('swiperLoop');
   const directionAttribute = swiperElement.getAttribute('swiperDirection') || defaultDirection;
   const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart') || defaultSlideStart;
   const fillEmptySlotsAttribute =
@@ -135,6 +137,13 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     return true;
   };
 
+  // Helper function for boolean attributes with default values
+  const getBooleanAttributeValue = (attrName, defaultValue) => {
+    const value = swiperElement.getAttribute(attrName);
+    if (!value || value === 'default') return defaultValue;
+    return value === 'true';
+  };
+
   const slidesPerViewSettings = {
     desktop: getSlidesPerViewValue('swiperSlidesPerViewDesktop', defaultSlidesPerViewDesktop),
     tablet: getSlidesPerViewValue('swiperSlidesPerViewTablet', defaultSlidesPerViewTablet),
@@ -178,7 +187,9 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
 
   // Ensure slides are duplicated based on 'swiperFillEmptySlots'
   const fillEmptySlots =
-    fillEmptySlotsAttribute === 'true' || fillEmptySlotsAttribute === 'default';
+    fillEmptySlotsAttribute === 'true' ||
+    fillEmptySlotsAttribute === 'default' ||
+    !fillEmptySlotsAttribute;
   if (fillEmptySlots) {
     duplicateSlidesToFillSpace(swiperElement, maxSlidesPerView);
   }
@@ -189,9 +200,10 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   // Determine if there are enough slides to enable looping
   const enoughSlidesForLoop = updatedTotalSlides > maxSlidesPerView;
 
-  // Adjust shouldLoop based on swiperLoop attribute and whether there are enough slides
-  const shouldLoop = loopAttribute === 'true' && enoughSlidesForLoop;
-  const shouldRewind = !shouldLoop && rewindAttribute === 'true';
+  // Adjust shouldLoop and shouldRewind based on attributes
+  const shouldLoop = getBooleanAttributeValue('swiperLoop', defaultLoop) && enoughSlidesForLoop;
+  const shouldRewind = !shouldLoop && getBooleanAttributeValue('swiperRewind', defaultRewind);
+
   const isRTL = directionAttribute === 'right-to-left';
 
   let initialSlideIndex = 0;

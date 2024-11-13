@@ -12,8 +12,10 @@
     const defaultSlideStart = "first";
     const defaultFillEmptySlots = true;
     const defaultEffect = "slide";
-    const rewindAttribute = swiperElement.getAttribute("swiperRewind");
-    const loopAttribute = swiperElement.getAttribute("swiperLoop");
+    const defaultRewind = true;
+    const defaultLoop = false;
+    const rewindAttributeValue = swiperElement.getAttribute("swiperRewind");
+    const loopAttributeValue = swiperElement.getAttribute("swiperLoop");
     const directionAttribute = swiperElement.getAttribute("swiperDirection") || defaultDirection;
     const startSlideAttribute = swiperElement.getAttribute("swiperSlideStart") || defaultSlideStart;
     const fillEmptySlotsAttribute = swiperElement.getAttribute("swiperFillEmptySlots") || defaultFillEmptySlots.toString();
@@ -109,6 +111,11 @@
       }
       return true;
     };
+    const getBooleanAttributeValue = (attrName, defaultValue) => {
+      const value = swiperElement.getAttribute(attrName);
+      if (!value || value === "default") return defaultValue;
+      return value === "true";
+    };
     const slidesPerViewSettings = {
       desktop: getSlidesPerViewValue("swiperSlidesPerViewDesktop", defaultSlidesPerViewDesktop),
       tablet: getSlidesPerViewValue("swiperSlidesPerViewTablet", defaultSlidesPerViewTablet),
@@ -143,14 +150,14 @@
         swiperWrapper.innerHTML += duplicateContent;
       }
     };
-    const fillEmptySlots = fillEmptySlotsAttribute === "true" || fillEmptySlotsAttribute === "default";
+    const fillEmptySlots = fillEmptySlotsAttribute === "true" || fillEmptySlotsAttribute === "default" || !fillEmptySlotsAttribute;
     if (fillEmptySlots) {
       duplicateSlidesToFillSpace(swiperElement, maxSlidesPerView);
     }
     const updatedTotalSlides = swiperElement.querySelectorAll(".swiper-slide").length;
     const enoughSlidesForLoop = updatedTotalSlides > maxSlidesPerView;
-    const shouldLoop = loopAttribute === "true" && enoughSlidesForLoop;
-    const shouldRewind = !shouldLoop && rewindAttribute === "true";
+    const shouldLoop = getBooleanAttributeValue("swiperLoop", defaultLoop) && enoughSlidesForLoop;
+    const shouldRewind = !shouldLoop && getBooleanAttributeValue("swiperRewind", defaultRewind);
     const isRTL = directionAttribute === "right-to-left";
     let initialSlideIndex = 0;
     if (startSlideAttribute === "last") {
