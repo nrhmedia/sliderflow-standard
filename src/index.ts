@@ -114,10 +114,10 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     return value === 'true';
   };
 
-  // Helper function for effect numeric values
+  // Updated getEffectValue function
   const getEffectValue = (attrName, defaultValue) => {
     const value = swiperElement.getAttribute(attrName);
-    if (!value || value === 'default' || value === '0' || value === '') {
+    if (value === null || value === 'default' || value === '') {
       return defaultValue;
     }
     if (!isNaN(value)) {

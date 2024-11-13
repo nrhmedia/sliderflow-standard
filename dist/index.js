@@ -95,7 +95,7 @@
     };
     const getEffectValue = (attrName, defaultValue) => {
       const value = swiperElement.getAttribute(attrName);
-      if (!value || value === "default" || value === "0" || value === "") {
+      if (value === null || value === "default" || value === "") {
         return defaultValue;
       }
       if (!isNaN(value)) {
