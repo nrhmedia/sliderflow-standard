@@ -3,12 +3,20 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     '.swiper-navigation.is-standard'
   );
 
+  // Set default values for attributes
+  const defaultDirection = 'left-to-right';
+  const defaultSlideStart = 'first';
+  const defaultFillEmptySlots = true;
+  const defaultEffect = 'slide';
+
+  // Retrieve attributes or set to default if not provided or set to 'default'
   const rewindAttribute = swiperElement.getAttribute('swiperRewind');
   const loopAttribute = swiperElement.getAttribute('swiperLoop');
-  const directionAttribute = swiperElement.getAttribute('swiperDirection');
-  const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart');
-  const fillEmptySlotsAttribute = swiperElement.getAttribute('swiperFillEmptySlots');
-  const effectAttribute = swiperElement.getAttribute('swiperEffect');
+  const directionAttribute = swiperElement.getAttribute('swiperDirection') || defaultDirection;
+  const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart') || defaultSlideStart;
+  const fillEmptySlotsAttribute =
+    swiperElement.getAttribute('swiperFillEmptySlots') || defaultFillEmptySlots.toString();
+  const effectAttribute = swiperElement.getAttribute('swiperEffect') || defaultEffect;
   const fadeCrossfadeAttribute = swiperElement.getAttribute('swiperEffectFadeCrossfade');
 
   // Attributes for Coverflow effect
@@ -94,13 +102,13 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
 
   const getPauseOnMouseEnterValue = (attr) => {
     const value = swiperElement.getAttribute(attr);
-    if (!value || value === 'default') return true;
+    if (!value || value === 'default') return false; // Changed to false
     return value === 'true';
   };
 
   const getDynamicBulletsValue = (attr) => {
     const value = swiperElement.getAttribute(attr);
-    if (!value || value === 'default') return true;
+    if (!value || value === 'default') return false; // Changed to false
     return value === 'true';
   };
 
@@ -117,9 +125,9 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   };
 
   // Helper function for boolean effect options
-  const getBooleanEffectOption = (attrName) => {
+  const getBooleanEffectOption = (attrName, defaultValue = true) => {
     const value = swiperElement.getAttribute(attrName);
-    if (!value || value === 'default') return true;
+    if (!value || value === 'default') return defaultValue;
     if (value === '0' || value === 'false') {
       return false;
     }
@@ -168,8 +176,10 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     }
   };
 
-  // Ensure slides are duplicated only if 'swiperFillEmptySlots' is set to 'true'
-  if (fillEmptySlotsAttribute === 'true') {
+  // Ensure slides are duplicated based on 'swiperFillEmptySlots'
+  const fillEmptySlots =
+    fillEmptySlotsAttribute === 'true' || fillEmptySlotsAttribute === 'default';
+  if (fillEmptySlots) {
     duplicateSlidesToFillSpace(swiperElement, maxSlidesPerView);
   }
 
@@ -298,8 +308,8 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     bulletPaginationEl || fractionPaginationEl || progressPaginationEl || scrollbarPaginationEl;
 
   // Determine the Swiper effect
-  let effectValue = 'slide'; // Default effect
-  if (effectAttribute && !['none', '0', '', 'slide', 'default'].includes(effectAttribute)) {
+  let effectValue = defaultEffect; // Default effect is 'slide'
+  if (effectAttribute && !['none', '0', '', 'default', 'slide'].includes(effectAttribute)) {
     effectValue = effectAttribute;
   }
 
@@ -452,7 +462,7 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
         }
       : false,
     loop: shouldLoop,
-    loopFillGroupWithBlank: fillEmptySlotsAttribute === 'true',
+    loopFillGroupWithBlank: fillEmptySlots,
     rewind: shouldRewind,
     grabCursor: true, // Enable the grab cursor
     breakpoints: {

@@ -8,12 +8,16 @@
     const swiperNavigation = swiperElement.parentElement.querySelector(
       ".swiper-navigation.is-standard"
     );
+    const defaultDirection = "left-to-right";
+    const defaultSlideStart = "first";
+    const defaultFillEmptySlots = true;
+    const defaultEffect = "slide";
     const rewindAttribute = swiperElement.getAttribute("swiperRewind");
     const loopAttribute = swiperElement.getAttribute("swiperLoop");
-    const directionAttribute = swiperElement.getAttribute("swiperDirection");
-    const startSlideAttribute = swiperElement.getAttribute("swiperSlideStart");
-    const fillEmptySlotsAttribute = swiperElement.getAttribute("swiperFillEmptySlots");
-    const effectAttribute = swiperElement.getAttribute("swiperEffect");
+    const directionAttribute = swiperElement.getAttribute("swiperDirection") || defaultDirection;
+    const startSlideAttribute = swiperElement.getAttribute("swiperSlideStart") || defaultSlideStart;
+    const fillEmptySlotsAttribute = swiperElement.getAttribute("swiperFillEmptySlots") || defaultFillEmptySlots.toString();
+    const effectAttribute = swiperElement.getAttribute("swiperEffect") || defaultEffect;
     const fadeCrossfadeAttribute = swiperElement.getAttribute("swiperEffectFadeCrossfade");
     const coverflowDepthAttribute = swiperElement.getAttribute("swiperEffectCoverflowDepth");
     const coverflowModifierAttribute = swiperElement.getAttribute("swiperEffectCoverflowModifier");
@@ -79,12 +83,12 @@
     };
     const getPauseOnMouseEnterValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
-      if (!value || value === "default") return true;
+      if (!value || value === "default") return false;
       return value === "true";
     };
     const getDynamicBulletsValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
-      if (!value || value === "default") return true;
+      if (!value || value === "default") return false;
       return value === "true";
     };
     const getEffectValue = (attrName, defaultValue) => {
@@ -97,9 +101,9 @@
       }
       return defaultValue;
     };
-    const getBooleanEffectOption = (attrName) => {
+    const getBooleanEffectOption = (attrName, defaultValue = true) => {
       const value = swiperElement.getAttribute(attrName);
-      if (!value || value === "default") return true;
+      if (!value || value === "default") return defaultValue;
       if (value === "0" || value === "false") {
         return false;
       }
@@ -139,7 +143,8 @@
         swiperWrapper.innerHTML += duplicateContent;
       }
     };
-    if (fillEmptySlotsAttribute === "true") {
+    const fillEmptySlots = fillEmptySlotsAttribute === "true" || fillEmptySlotsAttribute === "default";
+    if (fillEmptySlots) {
       duplicateSlidesToFillSpace(swiperElement, maxSlidesPerView);
     }
     const updatedTotalSlides = swiperElement.querySelectorAll(".swiper-slide").length;
@@ -234,8 +239,8 @@
       ".swiper-pagination.swiper-pagination-progressbar.is-standard"
     );
     const paginationEl = bulletPaginationEl || fractionPaginationEl || progressPaginationEl || scrollbarPaginationEl;
-    let effectValue = "slide";
-    if (effectAttribute && !["none", "0", "", "slide", "default"].includes(effectAttribute)) {
+    let effectValue = defaultEffect;
+    if (effectAttribute && !["none", "0", "", "default", "slide"].includes(effectAttribute)) {
       effectValue = effectAttribute;
     }
     const effectsRequiringSingleSlide = ["fade", "cube", "flip", "cards"];
@@ -351,7 +356,7 @@
         pauseOnMouseEnter: false
       } : false,
       loop: shouldLoop,
-      loopFillGroupWithBlank: fillEmptySlotsAttribute === "true",
+      loopFillGroupWithBlank: fillEmptySlots,
       rewind: shouldRewind,
       grabCursor: true,
       // Enable the grab cursor
