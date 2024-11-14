@@ -1,7 +1,13 @@
 document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) => {
-  const swiperNavigation = swiperElement.parentElement.querySelector(
-    '.swiper-navigation.is-standard'
-  );
+  // Locate swiper-navigation one level higher (i.e., two levels up from the swiper element)
+  const swiperNavigation = swiperElement
+    .closest('.swiper-navigation-container')
+    .querySelector('.swiper-navigation.is-standard');
+
+  if (!swiperNavigation) {
+    console.warn(`Swiper navigation not found for instance ${index}`);
+    return;
+  }
 
   // Set default values for attributes
   const defaultDirection = 'left-to-right';
