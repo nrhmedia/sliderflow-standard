@@ -5,11 +5,9 @@
 
   // src/index.ts
   document.querySelectorAll(".swiper.is-standard").forEach((swiperElement, index) => {
-    const swiperNavigation = swiperElement.closest(".swiper-navigation-container").querySelector(".swiper-navigation.is-standard");
-    if (!swiperNavigation) {
-      console.warn(`Swiper navigation not found for instance ${index}`);
-      return;
-    }
+    const swiperNavigation = swiperElement.parentElement.querySelector(
+      ".swiper-navigation.is-standard"
+    );
     const defaultDirection = "left-to-right";
     const defaultSlideStart = "first";
     const defaultFillEmptySlots = true;
