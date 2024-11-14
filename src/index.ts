@@ -3,15 +3,21 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     '.swiper-navigation.is-standard'
   );
 
-  // Set default values for attributes
+  // Set default values for attributes, including grabCursor
   const defaultDirection = 'left-to-right';
   const defaultSlideStart = 'first';
   const defaultFillEmptySlots = true;
   const defaultEffect = 'slide';
   const defaultRewind = true;
   const defaultLoop = false;
+  const defaultGrabCursor = true;
 
-  // Retrieve attributes or set to default if not provided or set to 'default'
+  // Retrieve the grab cursor attribute with default handling
+  const getGrabCursorValue = () => {
+    const value = swiperElement.getAttribute('swiperGrabCursor');
+    return value === null || value === 'default' || value === 'true' || value === '' ? true : false;
+  };
+
   const rewindAttributeValue = swiperElement.getAttribute('swiperRewind');
   const loopAttributeValue = swiperElement.getAttribute('swiperLoop');
   const directionAttribute = swiperElement.getAttribute('swiperDirection') || defaultDirection;
@@ -21,7 +27,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   const effectAttribute = swiperElement.getAttribute('swiperEffect') || defaultEffect;
   const fadeCrossfadeAttribute = swiperElement.getAttribute('swiperEffectFadeCrossfade');
 
-  // Attributes for Coverflow effect
   const coverflowDepthAttribute = swiperElement.getAttribute('swiperEffectCoverflowDepth');
   const coverflowModifierAttribute = swiperElement.getAttribute('swiperEffectCoverflowModifier');
   const coverflowRotateAttribute = swiperElement.getAttribute('swiperEffectCoverflowRotate');
@@ -31,11 +36,9 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     'swiperEffectCoverflowSlideShadows'
   );
 
-  // Attributes for Flip effect
   const flipLimitRotationAttribute = swiperElement.getAttribute('swiperEffectFlipLimitRotation');
   const flipSlideShadowsAttribute = swiperElement.getAttribute('swiperEffectFlipSlideShadows');
 
-  // Attributes for Cube effect
   const cubeShadowAttribute = swiperElement.getAttribute('swiperEffectCubeShadow');
   const cubeSlideShadowsAttribute = swiperElement.getAttribute('swiperEffectCubeSlideShadows');
   const cubeShadowOffsetAttribute = swiperElement.getAttribute(
@@ -43,7 +46,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   );
   const cubeShadowScaleAttribute = swiperElement.getAttribute('swiperEffectCubeShadowShadowScale');
 
-  // Attributes for Cards effect
   const cardsPerSlideOffsetAttribute = swiperElement.getAttribute(
     'swiperEffectCardsPerSlideOffset'
   );
@@ -53,24 +55,21 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   const cardsRotateAttribute = swiperElement.getAttribute('swiperEffectCardsRotate');
   const cardsSlideShadowsAttribute = swiperElement.getAttribute('swiperEffectCardsSlideShadows');
 
-  const defaultSpeed = 1000; // Default speed for manual interactions
-  const defaultAutoplayDelay = 5000; // Default autoplay delay
+  const defaultSpeed = 1000;
+  const defaultAutoplayDelay = 5000;
 
-  // Define default slides per view for each breakpoint
   const defaultSlidesPerViewDesktop = 4;
   const defaultSlidesPerViewTablet = 3;
   const defaultSlidesPerViewMobileLandscape = 2;
   const defaultSlidesPerViewMobilePortrait = 1;
 
-  // Define default space between slides for each breakpoint
   const defaultSpaceBetweenDesktop = 16;
   const defaultSpaceBetweenTablet = 12;
   const defaultSpaceBetweenMobileLandscape = 8;
   const defaultSpaceBetweenMobilePortrait = 0;
 
-  const marqueeSpeed = 1; // Speed for marquee mode
+  const marqueeSpeed = 1;
 
-  // Helper functions
   const getSlidesPerViewValue = (attr, defaultValue) => {
     const value = swiperElement.getAttribute(attr);
     if (!value || value === 'default') return defaultValue;
@@ -90,7 +89,7 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     if (!value || value === 'default') return defaultSpeed;
     if (value === 'true') return defaultSpeed;
     if (!isNaN(value) && Number(value) > 0) return Number(value);
-    return defaultSpeed; // Return defaultSpeed if invalid value
+    return defaultSpeed;
   };
 
   const getAutoplayValue = (attr) => {
@@ -104,17 +103,16 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
 
   const getPauseOnMouseEnterValue = (attr) => {
     const value = swiperElement.getAttribute(attr);
-    if (!value || value === 'default') return false; // Changed to false
+    if (!value || value === 'default') return false;
     return value === 'true';
   };
 
   const getDynamicBulletsValue = (attr) => {
     const value = swiperElement.getAttribute(attr);
-    if (!value || value === 'default') return false; // Changed to false
+    if (!value || value === 'default') return false;
     return value === 'true';
   };
 
-  // Updated getEffectValue function
   const getEffectValue = (attrName, defaultValue) => {
     const value = swiperElement.getAttribute(attrName);
     if (value === null || value === 'default' || value === '') {
@@ -126,18 +124,15 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     return defaultValue;
   };
 
-  // Helper function for boolean effect options
   const getBooleanEffectOption = (attrName, defaultValue = true) => {
     const value = swiperElement.getAttribute(attrName);
     if (!value || value === 'default') return defaultValue;
     if (value === '0' || value === 'false') {
       return false;
     }
-    // For 'true' or any other value, return true
     return true;
   };
 
-  // Helper function for boolean attributes with default values
   const getBooleanAttributeValue = (attrName, defaultValue) => {
     const value = swiperElement.getAttribute(attrName);
     if (!value || value === 'default') return defaultValue;
@@ -157,7 +152,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     ),
   };
 
-  // Determine the maximum slidesPerView value across breakpoints
   const maxSlidesPerView = Math.max(
     slidesPerViewSettings.desktop,
     slidesPerViewSettings.tablet,
@@ -167,7 +161,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
 
   const totalSlides = swiperElement.querySelectorAll('.swiper-slide').length;
 
-  // Manually duplicate slides to fill the visible space before initializing Swiper
   const duplicateSlidesToFillSpace = (swiperElement, slidesPerView) => {
     const slideCount = swiperElement.querySelectorAll('.swiper-slide').length;
     const containerWidth = swiperElement.offsetWidth;
@@ -185,7 +178,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     }
   };
 
-  // Ensure slides are duplicated based on 'swiperFillEmptySlots'
   const fillEmptySlots =
     fillEmptySlotsAttribute === 'true' ||
     fillEmptySlotsAttribute === 'default' ||
@@ -194,16 +186,11 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     duplicateSlidesToFillSpace(swiperElement, maxSlidesPerView);
   }
 
-  // Recalculate total slides after possible duplication
   const updatedTotalSlides = swiperElement.querySelectorAll('.swiper-slide').length;
-
-  // Determine if there are enough slides to enable looping
   const enoughSlidesForLoop = updatedTotalSlides > maxSlidesPerView;
 
-  // Adjust shouldLoop and shouldRewind based on attributes
   const shouldLoop = getBooleanAttributeValue('swiperLoop', defaultLoop) && enoughSlidesForLoop;
   const shouldRewind = !shouldLoop && getBooleanAttributeValue('swiperRewind', defaultRewind);
-
   const isRTL = directionAttribute === 'right-to-left';
 
   let initialSlideIndex = 0;
@@ -213,13 +200,9 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     initialSlideIndex = Number(startSlideAttribute);
   }
 
-  // Generate a unique class for this Swiper instance
   const uniqueClass = `swiper-instance-${index}`;
-
-  // Apply unique class to the Swiper element
   swiperElement.classList.add(uniqueClass);
 
-  // Inject marquee CSS globally but scoped to this specific Swiper instance
   const injectMarqueeCSS = (uniqueClass) => {
     const marqueeStyle = `
       .${uniqueClass} .swiper-wrapper {
@@ -246,7 +229,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     swiperElement.getAttribute('swiperAutoplayMobileLandscape') === 'marquee' ||
     swiperElement.getAttribute('swiperAutoplayMobilePortrait') === 'marquee';
 
-  // Inject the marquee CSS if autoplay is set to "marquee"
   if (autoplayMarqueeEnabled) {
     injectMarqueeCSS(uniqueClass);
   }
@@ -319,32 +301,22 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   const paginationEl =
     bulletPaginationEl || fractionPaginationEl || progressPaginationEl || scrollbarPaginationEl;
 
-  // Determine the Swiper effect
-  let effectValue = defaultEffect; // Default effect is 'slide'
+  let effectValue = defaultEffect;
   if (effectAttribute && !['none', '0', '', 'default', 'slide'].includes(effectAttribute)) {
     effectValue = effectAttribute;
   }
 
-  // List of effects that require slidesPerView: 1
   const effectsRequiringSingleSlide = ['fade', 'cube', 'flip', 'cards'];
-
-  // Check if the current effect requires slidesPerView: 1
   const requiresSingleSlide = effectsRequiringSingleSlide.includes(effectValue);
 
-  // Effect-specific options
   const effectOptions = {};
 
   if (effectValue === 'fade') {
-    // Handle the swiperEffectFadeCrossfade attribute
     const crossFadeValue = getBooleanEffectOption('swiperEffectFadeCrossfade');
-
     effectOptions.fadeEffect = { crossFade: crossFadeValue };
   } else if (effectValue === 'cube') {
-    // Get cube effect options
     const cubeShadow = getBooleanEffectOption('swiperEffectCubeShadow');
     const cubeSlideShadows = getBooleanEffectOption('swiperEffectCubeSlideShadows');
-
-    // Get cube shadow offset and scale values
     const cubeShadowOffset = getEffectValue('swiperEffectCubeShadowShadowOffset', 20);
     const cubeShadowScale = getEffectValue('swiperEffectCubeShadowShadowScale', 0.94);
 
@@ -355,7 +327,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
       shadowScale: cubeShadowScale,
     };
   } else if (effectValue === 'coverflow') {
-    // Get Coverflow effect values
     const coverflowDefaults = {
       depth: 100,
       modifier: 1,
@@ -376,7 +347,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     );
     const coverflowScale = getEffectValue('swiperEffectCoverflowScale', coverflowDefaults.scale);
 
-    // Handle the swiperEffectCoverflowSlideShadows attribute
     const coverflowSlideShadows = getBooleanEffectOption('swiperEffectCoverflowSlideShadows');
 
     effectOptions.coverflowEffect = {
@@ -388,7 +358,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
       slideShadows: coverflowSlideShadows,
     };
   } else if (effectValue === 'flip') {
-    // Get flip effect options
     const flipLimitRotation = getBooleanEffectOption('swiperEffectFlipLimitRotation');
     const flipSlideShadows = getBooleanEffectOption('swiperEffectFlipSlideShadows');
 
@@ -397,7 +366,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
       limitRotation: flipLimitRotation,
     };
   } else if (effectValue === 'cards') {
-    // Get cards effect options
     const cardsPerSlideOffset = getEffectValue('swiperEffectCardsPerSlideOffset', 8);
     const cardsPerSlideRotate = getEffectValue('swiperEffectCardsPerSlideRotate', 2);
     const cardsRotate = getBooleanEffectOption('swiperEffectCardsRotate');
@@ -421,15 +389,15 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     };
   }
 
-  // Adjust slidesPerView if the effect requires a single slide
   const initialSlidesPerView = requiresSingleSlide ? 1 : slidesPerViewSettings.mobilePortrait;
 
-  // Initialize Swiper
+  const grabCursorSetting = getGrabCursorValue();
+
   const swiper = new Swiper(swiperElement, {
     effect: effectValue,
     ...effectOptions,
     slidesPerView: initialSlidesPerView,
-    slidesPerGroup: 1, // Ensure it moves one slide at a time
+    slidesPerGroup: 1,
     spaceBetween: spaceBetweenSettings.mobilePortrait,
     speed: speedSettings.mobilePortrait,
     initialSlide: initialSlideIndex,
@@ -476,11 +444,11 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     loop: shouldLoop,
     loopFillGroupWithBlank: fillEmptySlots,
     rewind: shouldRewind,
-    grabCursor: true, // Enable the grab cursor
+    grabCursor: grabCursorSetting,
     breakpoints: {
       992: {
         slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
-        slidesPerGroup: 1, // Ensure it moves one slide at a time
+        slidesPerGroup: 1,
         spaceBetween: spaceBetweenSettings.desktop,
         speed: speedSettings.desktop,
         autoplay: autoplaySettings.desktop
@@ -496,7 +464,7 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
       },
       768: {
         slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
-        slidesPerGroup: 1, // Ensure it moves one slide at a time
+        slidesPerGroup: 1,
         spaceBetween: spaceBetweenSettings.tablet,
         speed: speedSettings.tablet,
         autoplay: autoplaySettings.tablet
@@ -512,7 +480,7 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
       },
       480: {
         slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
-        slidesPerGroup: 1, // Ensure it moves one slide at a time
+        slidesPerGroup: 1,
         spaceBetween: spaceBetweenSettings.mobileLandscape,
         speed: speedSettings.mobileLandscape,
         autoplay: autoplaySettings.mobileLandscape
@@ -565,7 +533,6 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
         }
       },
       reachEnd: function () {
-        // Stop autoplay if swiperRewind and swiperLoop are both false
         if (!shouldRewind && !shouldLoop) {
           this.autoplay.stop();
         }
@@ -583,14 +550,12 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
     },
   });
 
-  // Optional: Warn the user if slidesPerView is overridden
   if (requiresSingleSlide) {
     console.warn(
       `The "${effectValue}" effect requires slidesPerView to be 1. Overriding slidesPerView to 1.`
     );
   }
 
-  // Manually handle the navigation buttons
   const nextButton = swiperNavigation.querySelector(
     '.swiper-navigation-button.is-standard.is-next'
   );
@@ -599,13 +564,13 @@ document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) 
   );
 
   nextButton.addEventListener('click', (event) => {
-    event.preventDefault(); // Prevent any default action
+    event.preventDefault();
     swiper.autoplay.stop();
     swiper.slideNext(defaultSpeed);
   });
 
   prevButton.addEventListener('click', (event) => {
-    event.preventDefault(); // Prevent any default action
+    event.preventDefault();
     swiper.autoplay.stop();
     swiper.slidePrev(defaultSpeed);
   });

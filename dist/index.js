@@ -14,6 +14,11 @@
     const defaultEffect = "slide";
     const defaultRewind = true;
     const defaultLoop = false;
+    const defaultGrabCursor = true;
+    const getGrabCursorValue = () => {
+      const value = swiperElement.getAttribute("swiperGrabCursor");
+      return value === null || value === "default" || value === "true" || value === "" ? true : false;
+    };
     const rewindAttributeValue = swiperElement.getAttribute("swiperRewind");
     const loopAttributeValue = swiperElement.getAttribute("swiperLoop");
     const directionAttribute = swiperElement.getAttribute("swiperDirection") || defaultDirection;
@@ -325,12 +330,12 @@
       };
     }
     const initialSlidesPerView = requiresSingleSlide ? 1 : slidesPerViewSettings.mobilePortrait;
+    const grabCursorSetting = getGrabCursorValue();
     const swiper = new Swiper(swiperElement, {
       effect: effectValue,
       ...effectOptions,
       slidesPerView: initialSlidesPerView,
       slidesPerGroup: 1,
-      // Ensure it moves one slide at a time
       spaceBetween: spaceBetweenSettings.mobilePortrait,
       speed: speedSettings.mobilePortrait,
       initialSlide: initialSlideIndex,
@@ -365,13 +370,11 @@
       loop: shouldLoop,
       loopFillGroupWithBlank: fillEmptySlots,
       rewind: shouldRewind,
-      grabCursor: true,
-      // Enable the grab cursor
+      grabCursor: grabCursorSetting,
       breakpoints: {
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
           slidesPerGroup: 1,
-          // Ensure it moves one slide at a time
           spaceBetween: spaceBetweenSettings.desktop,
           speed: speedSettings.desktop,
           autoplay: autoplaySettings.desktop ? {
@@ -386,7 +389,6 @@
         768: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
           slidesPerGroup: 1,
-          // Ensure it moves one slide at a time
           spaceBetween: spaceBetweenSettings.tablet,
           speed: speedSettings.tablet,
           autoplay: autoplaySettings.tablet ? {
@@ -401,7 +403,6 @@
         480: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
           slidesPerGroup: 1,
-          // Ensure it moves one slide at a time
           spaceBetween: spaceBetweenSettings.mobileLandscape,
           speed: speedSettings.mobileLandscape,
           autoplay: autoplaySettings.mobileLandscape ? {
