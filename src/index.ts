@@ -309,6 +309,21 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     };
 
+    // **Updated code for play and pause buttons**
+    const nextButton = swiperNavigation.querySelector(
+      '.swiper-navigation-button.is-standard.is-next'
+    );
+    const prevButton = swiperNavigation.querySelector(
+      '.swiper-navigation-button.is-standard.is-prev'
+    );
+    const playButton = swiperNavigation.querySelector(
+      '.swiper-navigation-button.is-standard.is-play'
+    );
+    const pauseButton = swiperNavigation.querySelector(
+      '.swiper-navigation-button.is-standard.is-pause'
+    );
+
+    // Initialize Swiper
     const swiper = new Swiper(swiperElement, {
       effect: effectValue,
       ...effectOptions,
@@ -404,6 +419,8 @@ document.addEventListener('DOMContentLoaded', () => {
               progressBarFill.style.transform = `scaleX(${progress})`;
             }
           }
+
+          updateNavigationVisibility(this);
         },
         slideChange: function () {
           if (fractionPaginationEl) {
@@ -438,6 +455,12 @@ document.addEventListener('DOMContentLoaded', () => {
           this.update();
           this.autoplay.start();
         },
+        update: function () {
+          updateNavigationVisibility(this);
+        },
+        resize: function () {
+          updateNavigationVisibility(this);
+        },
       },
     });
 
@@ -447,14 +470,31 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    // Existing event listeners for next and previous buttons
-    const nextButton = swiperNavigation.querySelector(
-      '.swiper-navigation-button.is-standard.is-next'
-    );
-    const prevButton = swiperNavigation.querySelector(
-      '.swiper-navigation-button.is-standard.is-prev'
-    );
+    // Define the updateNavigationVisibility function
+    function updateNavigationVisibility(swiper) {
+      const { isLocked } = swiper;
 
+      if (nextButton) {
+        nextButton.style.display = isLocked ? 'none' : '';
+      }
+      if (prevButton) {
+        prevButton.style.display = isLocked ? 'none' : '';
+      }
+      if (playButton) {
+        playButton.style.display = isLocked ? 'none' : '';
+      }
+      if (pauseButton) {
+        pauseButton.style.display = isLocked ? 'none' : '';
+      }
+      if (fractionPaginationEl) {
+        fractionPaginationEl.style.display = isLocked ? 'none' : '';
+      }
+      if (progressPaginationEl) {
+        progressPaginationEl.style.display = isLocked ? 'none' : '';
+      }
+    }
+
+    // Existing event listeners for next and previous buttons
     nextButton.addEventListener('click', (event) => {
       event.preventDefault();
       swiper.autoplay.stop();
@@ -466,14 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
       swiper.autoplay.stop();
       swiper.slidePrev(defaultSpeed);
     });
-
-    // **Updated code for play and pause buttons**
-    const playButton = swiperNavigation.querySelector(
-      '.swiper-navigation-button.is-standard.is-play'
-    );
-    const pauseButton = swiperNavigation.querySelector(
-      '.swiper-navigation-button.is-standard.is-pause'
-    );
 
     // Add event listener for the pause button
     if (pauseButton) {

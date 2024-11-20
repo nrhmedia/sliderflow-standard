@@ -252,6 +252,18 @@
           // Autoplay is initially disabled
         };
       };
+      const nextButton = swiperNavigation.querySelector(
+        ".swiper-navigation-button.is-standard.is-next"
+      );
+      const prevButton = swiperNavigation.querySelector(
+        ".swiper-navigation-button.is-standard.is-prev"
+      );
+      const playButton = swiperNavigation.querySelector(
+        ".swiper-navigation-button.is-standard.is-play"
+      );
+      const pauseButton = swiperNavigation.querySelector(
+        ".swiper-navigation-button.is-standard.is-pause"
+      );
       const swiper = new Swiper(swiperElement, {
         effect: effectValue,
         ...effectOptions,
@@ -336,6 +348,7 @@
                 progressBarFill.style.transform = `scaleX(${progress})`;
               }
             }
+            updateNavigationVisibility(this);
           },
           slideChange: function() {
             if (fractionPaginationEl) {
@@ -368,6 +381,12 @@
             this.params.loop = shouldLoop;
             this.update();
             this.autoplay.start();
+          },
+          update: function() {
+            updateNavigationVisibility(this);
+          },
+          resize: function() {
+            updateNavigationVisibility(this);
           }
         }
       });
@@ -376,12 +395,27 @@
           `The "${effectValue}" effect requires slidesPerView to be 1. Overriding slidesPerView to 1.`
         );
       }
-      const nextButton = swiperNavigation.querySelector(
-        ".swiper-navigation-button.is-standard.is-next"
-      );
-      const prevButton = swiperNavigation.querySelector(
-        ".swiper-navigation-button.is-standard.is-prev"
-      );
+      function updateNavigationVisibility(swiper2) {
+        const { isLocked } = swiper2;
+        if (nextButton) {
+          nextButton.style.display = isLocked ? "none" : "";
+        }
+        if (prevButton) {
+          prevButton.style.display = isLocked ? "none" : "";
+        }
+        if (playButton) {
+          playButton.style.display = isLocked ? "none" : "";
+        }
+        if (pauseButton) {
+          pauseButton.style.display = isLocked ? "none" : "";
+        }
+        if (fractionPaginationEl) {
+          fractionPaginationEl.style.display = isLocked ? "none" : "";
+        }
+        if (progressPaginationEl) {
+          progressPaginationEl.style.display = isLocked ? "none" : "";
+        }
+      }
       nextButton.addEventListener("click", (event) => {
         event.preventDefault();
         swiper.autoplay.stop();
@@ -392,12 +426,6 @@
         swiper.autoplay.stop();
         swiper.slidePrev(defaultSpeed);
       });
-      const playButton = swiperNavigation.querySelector(
-        ".swiper-navigation-button.is-standard.is-play"
-      );
-      const pauseButton = swiperNavigation.querySelector(
-        ".swiper-navigation-button.is-standard.is-pause"
-      );
       if (pauseButton) {
         pauseButton.addEventListener("click", (event) => {
           event.preventDefault();
