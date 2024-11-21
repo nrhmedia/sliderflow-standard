@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultGrabCursor = true;
     const defaultSpeed = 1000;
     const defaultAutoplayDelay = 5000;
+    const defaultFreeMode = true; // Default value for freeMode
+    const defaultFreeModeMomentumBounce = true; // Default value for freeModeMomentumBounce
 
     const defaultSlidesPerViewDesktop = 4;
     const defaultSlidesPerViewTablet = 3;
@@ -45,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const getSpeedValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultSpeed;
-      if (value === 'true') return defaultSpeed;
       if (!isNaN(value) && Number(value) > 0) return Number(value);
       return defaultSpeed;
     };
@@ -77,25 +78,33 @@ document.addEventListener('DOMContentLoaded', () => {
       if (value === null || value === 'default' || value === '') {
         return defaultValue;
       }
-      if (!isNaN(value)) {
-        return Number(value);
-      }
-      return defaultValue;
-    };
-
-    const getBooleanEffectOption = (attrName, defaultValue = true) => {
-      const value = swiperElement.getAttribute(attrName);
-      if (!value || value === 'default') return defaultValue;
-      if (value === '0' || value === 'false') {
-        return false;
-      }
-      return true;
+      return value;
     };
 
     const getBooleanAttributeValue = (attrName, defaultValue) => {
       const value = swiperElement.getAttribute(attrName);
       if (!value || value === 'default') return defaultValue;
       return value === 'true';
+    };
+
+    // Helper function for swiperFreeMode
+    const getFreeModeValue = (attrName, defaultValue) => {
+      const value = swiperElement.getAttribute(attrName);
+      if (value === 'false' || value === '0') {
+        return false;
+      }
+      // For 'true', 'default', '', null, or any other value, return true
+      return true;
+    };
+
+    // Helper function for swiperFreeModeMomentumBounce
+    const getFreeModeMomentumBounceValue = (attrName, defaultValue) => {
+      const value = swiperElement.getAttribute(attrName);
+      if (value === 'false' || value === '0') {
+        return false;
+      }
+      // For 'true', 'default', '', null, or any other value, return true
+      return true;
     };
 
     // Retrieve attribute values
@@ -250,9 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
       'is-standard',
       'swiper-pagination-bullet-active',
     ];
-    const extraBulletClasses = Array.from(
-      bulletPaginationEl ? bulletPaginationEl.children[0].classList : []
-    ).filter((item) => !defaultBulletClasses.includes(item));
+
+    const extraBulletClasses = bulletPaginationEl
+      ? Array.from(bulletPaginationEl.children)
+          .flatMap((child) => Array.from(child.classList))
+          .filter((item) => !defaultBulletClasses.includes(item))
+      : [];
 
     const fractionPaginationEl = swiperNavigation.querySelector(
       '.swiper-pagination.is-fraction.is-standard'
@@ -289,8 +301,29 @@ document.addEventListener('DOMContentLoaded', () => {
         : false;
     })();
 
+    // Retrieve the freeMode value
+    const freeMode = getFreeModeValue('swiperFreeMode', defaultFreeMode);
+
+    // Retrieve the freeModeMomentumBounce value
+    const freeModeMomentumBounce = getFreeModeMomentumBounceValue(
+      'swiperFreeModeMomentumBounce',
+      defaultFreeModeMomentumBounce
+    );
+
     // Function to get autoplay configuration
     const getAutoplayConfig = (autoplayValue) => {
+      if (autoplayValue === false) {
+        return false;
+      }
+      if (autoplayValue === 'marquee') {
+        return {
+          delay: marqueeSpeed,
+          disableOnInteraction: false,
+          reverseDirection: isRTL,
+          pauseOnMouseEnter: false,
+          enabled: true,
+        };
+      }
       if (autoplayValue) {
         return {
           delay: autoplayValue,
@@ -300,13 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
           enabled: true,
         };
       }
-      return {
-        delay: defaultAutoplayDelay, // Set your default delay
-        disableOnInteraction: false,
-        reverseDirection: isRTL,
-        pauseOnMouseEnter: false,
-        enabled: false, // Autoplay is initially disabled
-      };
+      return false;
     };
 
     // **Updated code for play and pause buttons**
@@ -332,6 +359,10 @@ document.addEventListener('DOMContentLoaded', () => {
       spaceBetween: spaceBetweenSettings.mobilePortrait,
       speed: speedSettings.mobilePortrait,
       initialSlide: initialSlideIndex,
+      freeMode: {
+        enabled: freeMode, // Enabled or disabled based on swiperFreeMode attribute
+        momentumBounce: freeModeMomentumBounce, // Controlled via swiperFreeModeMomentumBounce attribute
+      },
       pagination: {
         el: paginationEl,
         type: bulletPaginationEl
@@ -471,8 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Define the updateNavigationVisibility function
-    function updateNavigationVisibility(swiper) {
-      const { isLocked } = swiper;
+    function updateNavigationVisibility(swiperInstance) {
+      const { isLocked } = swiperInstance;
 
       if (nextButton) {
         nextButton.style.display = isLocked ? 'none' : '';
@@ -495,17 +526,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Existing event listeners for next and previous buttons
-    nextButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      swiper.autoplay.stop();
-      swiper.slideNext(defaultSpeed);
-    });
+    if (nextButton) {
+      nextButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        swiper.autoplay.stop();
+        swiper.slideNext(defaultSpeed);
+      });
+    }
 
-    prevButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      swiper.autoplay.stop();
-      swiper.slidePrev(defaultSpeed);
-    });
+    if (prevButton) {
+      prevButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        swiper.autoplay.stop();
+        swiper.slidePrev(defaultSpeed);
+      });
+    }
 
     // Add event listener for the pause button
     if (pauseButton) {
