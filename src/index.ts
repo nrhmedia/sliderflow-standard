@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSpaceBetweenDesktop = 16;
     const defaultSpaceBetweenTablet = 12;
     const defaultSpaceBetweenMobileLandscape = 8;
-    const defaultSpaceBetweenMobilePortrait = 0;
+    const defaultSpaceBetweenMobilePortrait = 4;
 
     const marqueeSpeed = 1;
 
