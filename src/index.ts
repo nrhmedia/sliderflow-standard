@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Add event listener for the play button
+    // Add event listener for the play buttons
     if (playButton) {
       playButton.addEventListener('click', (event) => {
         event.preventDefault();
