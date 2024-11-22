@@ -597,24 +597,33 @@ document.addEventListener('DOMContentLoaded', () => {
       swiper.autoplay.start();
     };
 
+    const BREAKPOINT_DESKTOP = 992;
+    const BREAKPOINT_TABLET = 768;
+    const BREAKPOINT_MOBILE_LANDSCAPE = 480;
+
     const handlePauseOnMouseEvents = () => {
       const { currentBreakpoint } = swiper;
       let pauseOnMouseEnter = pauseSettings.mobilePortrait;
 
-      if (currentBreakpoint >= 992) {
+      if (currentBreakpoint >= BREAKPOINT_DESKTOP) {
         pauseOnMouseEnter = pauseSettings.desktop;
-      } else if (currentBreakpoint >= 768) {
+      } else if (currentBreakpoint >= BREAKPOINT_TABLET) {
         pauseOnMouseEnter = pauseSettings.tablet;
-      } else if (currentBreakpoint >= 480) {
+      } else if (currentBreakpoint >= BREAKPOINT_MOBILE_LANDSCAPE) {
         pauseOnMouseEnter = pauseSettings.mobileLandscape;
       }
 
-      if (pauseOnMouseEnter) {
+      const shouldAddListeners = pauseOnMouseEnter && !swiperElement.hasMouseListeners;
+      const shouldRemoveListeners = !pauseOnMouseEnter && swiperElement.hasMouseListeners;
+
+      if (shouldAddListeners) {
         swiperElement.addEventListener('mouseenter', mouseEnterHandler);
         swiperElement.addEventListener('mouseleave', mouseLeaveHandler);
-      } else {
+        swiperElement.hasMouseListeners = true;
+      } else if (shouldRemoveListeners) {
         swiperElement.removeEventListener('mouseenter', mouseEnterHandler);
         swiperElement.removeEventListener('mouseleave', mouseLeaveHandler);
+        swiperElement.hasMouseListeners = false;
       }
     };
 
