@@ -87,6 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return value === 'true';
     };
 
+    // Helper function for numeric attributes (e.g., Coverflow effect)
+    const getNumericAttributeValue = (attrName, defaultValue) => {
+      const value = swiperElement.getAttribute(attrName);
+      if (!value || value === 'default') return defaultValue;
+      const num = parseFloat(value);
+      return isNaN(num) ? defaultValue : num;
+    };
+
     // Helper function for swiperFreeMode
     const getFreeModeValue = (attrName, defaultValue) => {
       const value = swiperElement.getAttribute(attrName);
@@ -287,10 +295,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const effectsRequiringSingleSlide = ['fade', 'cube', 'flip', 'cards'];
     const requiresSingleSlide = effectsRequiringSingleSlide.includes(effectValue);
 
+    // Prepare effectOptions
     const effectOptions = {};
 
-    // Effect configurations (e.g., fade, cube)
-    // ... [Effect configurations remain unchanged]
+    // If using coverflow, read the coverflow-related attributes from DOM
+    if (effectValue === 'coverflow') {
+      effectOptions.coverflowEffect = {
+        rotate: getNumericAttributeValue('swiperEffectCoverflowRotate', 50),
+        stretch: getNumericAttributeValue('swiperEffectCoverflowStretch', 0),
+        depth: getNumericAttributeValue('swiperEffectCoverflowDepth', 100),
+        modifier: getNumericAttributeValue('swiperEffectCoverflowModifier', 1),
+        slideShadows: getBooleanAttributeValue('swiperEffectCoverflowSlideShadows', true),
+        // If your Swiper version supports scale in coverflow, enable it here:
+        scale: getNumericAttributeValue('swiperEffectCoverflowScale', 1),
+      };
+    }
 
     const initialSlidesPerView = requiresSingleSlide ? 1 : slidesPerViewSettings.mobilePortrait;
 
@@ -353,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Swiper
     const swiper = new Swiper(swiperElement, {
       effect: effectValue,
-      ...effectOptions,
+      ...effectOptions, // <-- Our coverflowEffect options are spread in here
       slidesPerView: initialSlidesPerView,
       slidesPerGroup: 1,
       spaceBetween: spaceBetweenSettings.mobilePortrait,
