@@ -597,33 +597,24 @@ document.addEventListener('DOMContentLoaded', () => {
       swiper.autoplay.start();
     };
 
-    const BREAKPOINT_DESKTOP = 992;
-    const BREAKPOINT_TABLET = 768;
-    const BREAKPOINT_MOBILE_LANDSCAPE = 480;
-
     const handlePauseOnMouseEvents = () => {
       const { currentBreakpoint } = swiper;
       let pauseOnMouseEnter = pauseSettings.mobilePortrait;
 
-      if (currentBreakpoint >= BREAKPOINT_DESKTOP) {
+      if (currentBreakpoint >= 992) {
         pauseOnMouseEnter = pauseSettings.desktop;
-      } else if (currentBreakpoint >= BREAKPOINT_TABLET) {
+      } else if (currentBreakpoint >= 768) {
         pauseOnMouseEnter = pauseSettings.tablet;
-      } else if (currentBreakpoint >= BREAKPOINT_MOBILE_LANDSCAPE) {
+      } else if (currentBreakpoint >= 480) {
         pauseOnMouseEnter = pauseSettings.mobileLandscape;
       }
 
-      const shouldAddListeners = pauseOnMouseEnter && !swiperElement.hasMouseListeners;
-      const shouldRemoveListeners = !pauseOnMouseEnter && swiperElement.hasMouseListeners;
-
-      if (shouldAddListeners) {
+      if (pauseOnMouseEnter) {
         swiperElement.addEventListener('mouseenter', mouseEnterHandler);
         swiperElement.addEventListener('mouseleave', mouseLeaveHandler);
-        swiperElement.hasMouseListeners = true;
-      } else if (shouldRemoveListeners) {
+      } else {
         swiperElement.removeEventListener('mouseenter', mouseEnterHandler);
         swiperElement.removeEventListener('mouseleave', mouseLeaveHandler);
-        swiperElement.hasMouseListeners = false;
       }
     };
 
