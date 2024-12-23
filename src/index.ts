@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultAutoplayDelay = 5000;
     const defaultFreeMode = true; // Default value for freeMode
     const defaultFreeModeMomentumBounce = true; // Default value for freeModeMomentumBounce
+    const defaultCenteredSlides = false; // Default for swiperCenteredSlides
 
     const defaultSlidesPerViewDesktop = 4;
     const defaultSlidesPerViewTablet = 3;
@@ -121,6 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const fillEmptySlotsAttribute =
       swiperElement.getAttribute('swiperFillEmptySlots') || defaultFillEmptySlots.toString();
     const effectAttribute = swiperElement.getAttribute('swiperEffect') || defaultEffect;
+    // NEW: read centeredSlides attribute
+    const centeredSlidesAttribute = getBooleanAttributeValue(
+      'swiperCenteredSlides',
+      defaultCenteredSlides
+    );
 
     const slidesPerViewSettings = {
       desktop: getSlidesPerViewValue('swiperSlidesPerViewDesktop', defaultSlidesPerViewDesktop),
@@ -355,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     };
 
-    // **Updated code for play and pause buttons**
+    // Buttons
     const nextButton = swiperNavigation.querySelector(
       '.swiper-navigation-button.is-standard.is-next'
     );
@@ -372,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Swiper
     const swiper = new Swiper(swiperElement, {
       effect: effectValue,
-      ...effectOptions, // <-- Our coverflowEffect options are spread in here
+      ...effectOptions, // <-- Our coverflowEffect options are spread here
       slidesPerView: initialSlidesPerView,
       slidesPerGroup: 1,
       spaceBetween: spaceBetweenSettings.mobilePortrait,
@@ -382,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enabled: freeMode, // Enabled or disabled based on swiperFreeMode attribute
         momentumBounce: freeModeMomentumBounce, // Controlled via swiperFreeModeMomentumBounce attribute
       },
+      centeredSlides: centeredSlidesAttribute, // <-- NEW: Use the centered slides attribute here
       pagination: {
         el: paginationEl,
         type: bulletPaginationEl
@@ -429,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pagination: {
             dynamicBullets: dynamicBulletsSettings.desktop,
           },
+          centeredSlides: centeredSlidesAttribute, // also applied at this breakpoint
         },
         768: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
@@ -439,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pagination: {
             dynamicBullets: dynamicBulletsSettings.tablet,
           },
+          centeredSlides: centeredSlidesAttribute,
         },
         480: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
@@ -449,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pagination: {
             dynamicBullets: dynamicBulletsSettings.mobileLandscape,
           },
+          centeredSlides: centeredSlidesAttribute,
         },
       },
       on: {
