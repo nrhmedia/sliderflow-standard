@@ -1,4 +1,3 @@
-<script>
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) => {
     const swiperNavigation = swiperElement.parentElement.querySelector(
@@ -395,10 +394,10 @@ document.addEventListener('DOMContentLoaded', () => {
         type: bulletPaginationEl
           ? 'bullets'
           : fractionPaginationEl
-          ? 'fraction'
-          : progressPaginationEl
-          ? 'progressbar'
-          : 'custom',
+            ? 'fraction'
+            : progressPaginationEl
+              ? 'progressbar'
+              : 'custom',
         dynamicBullets: dynamicBulletsSettings.mobilePortrait,
         renderBullet: bulletPaginationEl
           ? function (index, className) {
@@ -655,4 +654,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-</script>
