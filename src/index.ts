@@ -1,4 +1,4 @@
-function initSlider() {
+document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) => {
     const swiperNavigation = swiperElement.parentElement.querySelector(
       '.swiper-navigation.is-standard'
@@ -653,6 +653,4 @@ function initSlider() {
       handlePauseOnMouseEvents();
     });
   });
-}
-
-window['initSlider'] = initSlider;
+});
