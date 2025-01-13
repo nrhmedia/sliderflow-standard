@@ -116,6 +116,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     };
 
+    // NEW: Helper function for slidesPerGroup
+    const getSlidesPerGroupValue = (attr) => {
+      const value = swiperElement.getAttribute(attr);
+      if (!value || value === 'default') return 1;
+      const numberValue = Number(value);
+      if (!isNaN(numberValue) && numberValue > 0) {
+        return numberValue;
+      }
+      return 1;
+    };
+
     // Retrieve attribute values
     const directionAttribute = swiperElement.getAttribute('swiperDirection') || defaultDirection;
     const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart') || defaultSlideStart;
@@ -139,6 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
         'swiperSlidesPerViewMobilePortrait',
         defaultSlidesPerViewMobilePortrait
       ),
+    };
+
+    // NEW: slidesPerGroup settings
+    const slidesPerGroupSettings = {
+      desktop: getSlidesPerGroupValue('swiperSlidesPerGroupDesktop'),
+      tablet: getSlidesPerGroupValue('swiperSlidesPerGroupTablet'),
+      mobileLandscape: getSlidesPerGroupValue('swiperSlidesPerGroupMobileLandscape'),
+      mobilePortrait: getSlidesPerGroupValue('swiperSlidesPerGroupMobileDesktop'),
     };
 
     const maxSlidesPerView = Math.max(
@@ -380,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
       effect: effectValue,
       ...effectOptions, // <-- Our coverflowEffect options are spread here
       slidesPerView: initialSlidesPerView,
-      slidesPerGroup: 1,
+      slidesPerGroup: slidesPerGroupSettings.mobilePortrait, // <-- Use the new attribute for mobile
       spaceBetween: spaceBetweenSettings.mobilePortrait,
       speed: speedSettings.mobilePortrait,
       initialSlide: initialSlideIndex,
@@ -429,18 +448,18 @@ document.addEventListener('DOMContentLoaded', () => {
       breakpoints: {
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
-          slidesPerGroup: 1,
+          slidesPerGroup: slidesPerGroupSettings.desktop, // <-- Desktop slidesPerGroup
           spaceBetween: spaceBetweenSettings.desktop,
           speed: speedSettings.desktop,
           autoplay: getAutoplayConfig(autoplaySettings.desktop),
           pagination: {
             dynamicBullets: dynamicBulletsSettings.desktop,
           },
-          centeredSlides: centeredSlidesAttribute, // also applied at this breakpoint
+          centeredSlides: centeredSlidesAttribute,
         },
         768: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
-          slidesPerGroup: 1,
+          slidesPerGroup: slidesPerGroupSettings.tablet, // <-- Tablet slidesPerGroup
           spaceBetween: spaceBetweenSettings.tablet,
           speed: speedSettings.tablet,
           autoplay: getAutoplayConfig(autoplaySettings.tablet),
@@ -451,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         480: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
-          slidesPerGroup: 1,
+          slidesPerGroup: slidesPerGroupSettings.mobileLandscape, // <-- Mobile Landscape slidesPerGroup
           spaceBetween: spaceBetweenSettings.mobileLandscape,
           speed: speedSettings.mobileLandscape,
           autoplay: getAutoplayConfig(autoplaySettings.mobileLandscape),
@@ -579,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Add event listener for the play buttons
+    // Add event listener for the play button
     if (playButton) {
       playButton.addEventListener('click', (event) => {
         event.preventDefault();
