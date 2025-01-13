@@ -152,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
       ),
     };
 
-    // NEW: slidesPerGroup settings
+    // NEW: slidesPerGroup settings (fixed the mobilePortrait key)
     const slidesPerGroupSettings = {
       desktop: getSlidesPerGroupValue('swiperSlidesPerGroupDesktop'),
       tablet: getSlidesPerGroupValue('swiperSlidesPerGroupTablet'),
       mobileLandscape: getSlidesPerGroupValue('swiperSlidesPerGroupMobileLandscape'),
-      mobilePortrait: getSlidesPerGroupValue('swiperSlidesPerGroupMobileDesktop'),
+      mobilePortrait: getSlidesPerGroupValue('swiperSlidesPerGroupMobilePortrait'),
     };
 
     const maxSlidesPerView = Math.max(
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
       effect: effectValue,
       ...effectOptions, // <-- Our coverflowEffect options are spread here
       slidesPerView: initialSlidesPerView,
-      slidesPerGroup: slidesPerGroupSettings.mobilePortrait, // <-- Use the new attribute for mobile
+      slidesPerGroup: slidesPerGroupSettings.mobilePortrait, // <-- Use the new attribute for mobile portrait
       spaceBetween: spaceBetweenSettings.mobilePortrait,
       speed: speedSettings.mobilePortrait,
       initialSlide: initialSlideIndex,
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enabled: freeMode, // Enabled or disabled based on swiperFreeMode attribute
         momentumBounce: freeModeMomentumBounce, // Controlled via swiperFreeModeMomentumBounce attribute
       },
-      centeredSlides: centeredSlidesAttribute, // <-- NEW: Use the centered slides attribute here
+      centeredSlides: centeredSlidesAttribute,
       pagination: {
         el: paginationEl,
         type: bulletPaginationEl
