@@ -673,3 +673,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+</script>
+
+<!-- [Web Bae] Copy Component -->
+<script>
+// Function to handle the copy operation
+const handleCopy = (copyButton, dataAttribute) => {
+  const buttonText = copyButton.querySelector('[wb-data="text"]');
+  buttonText.textContent = "Copying..."; // Inform user operation in progress
+
+  const copyData = (event) => {
+    event.preventDefault();
+    const componentData = copyButton.querySelector(`[wb-data="${dataAttribute}"]`).textContent;
+
+    // Determine if content is JSON or plain text
+    try {
+      JSON.parse(componentData);
+      // If valid JSON, set it as JSON data
+      event.clipboardData.setData("application/json", componentData);
+    } catch (e) {
+      // If not JSON, set as plain text
+      event.clipboardData.setData("text/plain", componentData);
+    }
+  };
+
+  // Listen for copy event
+  document.addEventListener("copy", copyData);
+  document.execCommand("copy"); // Execute copy command
+  document.removeEventListener("copy", copyData); // Remove listener
+
+  // Restore button text after 1 second
+  setTimeout(() => {
+    buttonText.textContent = "Done! Copy again?";
+  }, 1000);
+};
+
+// Get all copy buttons
+const copyButtons = document.querySelectorAll("[wb-data=copy-button]");
+
+// Attach click event listeners to each copy button
+copyButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    const dataAttribute = button.getAttribute("wb-data-copy-target"); // Determine which data attribute to copy
+    handleCopy(button, dataAttribute);
+  });
+});
