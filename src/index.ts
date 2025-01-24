@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
       '.swiper-navigation.is-standard'
     );
 
-    // Set default values for attributes
+    // Set default values for all attributes
     const defaultDirection = 'left-to-right';
     const defaultSlideStart = 'first';
     const defaultFillEmptySlots = true;
