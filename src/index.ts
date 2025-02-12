@@ -25,7 +25,9 @@ function initializeSwipers() {
       '.swiper-navigation.is-standard'
     );
 
+    // -----------------------------------------------------------
     // Set default values for attributes
+    // -----------------------------------------------------------
     const defaultDirection = 'left-to-right';
     const defaultSlideStart = 'first';
     const defaultFillEmptySlots = true;
@@ -51,7 +53,11 @@ function initializeSwipers() {
 
     const marqueeSpeed = 1;
 
-    // Helper functions to retrieve attribute values
+    // -----------------------------------------------------------
+    // Helper functions
+    // -----------------------------------------------------------
+
+    // (For slidesPerView-like attributes)
     const getSlidesPerViewValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultValue;
@@ -59,6 +65,7 @@ function initializeSwipers() {
       return defaultValue;
     };
 
+    // (For spaceBetween-like attributes)
     const getSpaceBetweenValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultValue;
@@ -66,6 +73,7 @@ function initializeSwipers() {
       return defaultValue;
     };
 
+    // (For speed-like attributes)
     const getSpeedValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultSpeed;
@@ -73,7 +81,7 @@ function initializeSwipers() {
       return defaultSpeed;
     };
 
-    // Adjusted getAutoplayValue function
+    // (For autoplay-like attributes)
     const getAutoplayValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (value === 'false') return false;
@@ -83,6 +91,7 @@ function initializeSwipers() {
       return defaultAutoplayDelay;
     };
 
+    // (For pauseOnMouseEnter-like attributes)
     const getPauseOnMouseEnterValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return false;
@@ -109,7 +118,6 @@ function initializeSwipers() {
       return value === 'true';
     };
 
-    // Helper function for numeric attributes (e.g., Coverflow effect)
     const getNumericAttributeValue = (attrName, defaultValue) => {
       const value = swiperElement.getAttribute(attrName);
       if (!value || value === 'default') return defaultValue;
@@ -117,7 +125,6 @@ function initializeSwipers() {
       return isNaN(num) ? defaultValue : num;
     };
 
-    // Helper function for swiperFreeMode
     const getFreeModeValue = (attrName, defaultValue) => {
       const value = swiperElement.getAttribute(attrName);
       if (value === 'false' || value === '0') {
@@ -127,7 +134,6 @@ function initializeSwipers() {
       return true;
     };
 
-    // Helper function for swiperFreeModeMomentumBounce
     const getFreeModeMomentumBounceValue = (attrName, defaultValue) => {
       const value = swiperElement.getAttribute(attrName);
       if (value === 'false' || value === '0') {
@@ -137,7 +143,7 @@ function initializeSwipers() {
       return true;
     };
 
-    // NEW: Helper function for slidesPerGroup
+    // (For slidesPerGroup-like attributes)
     const getSlidesPerGroupValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return 1;
@@ -148,13 +154,27 @@ function initializeSwipers() {
       return 1;
     };
 
-    // Retrieve attribute values
+    // -----------------------------------------------------------
+    // NEW: Helper function for swiperAllowTouchMove
+    // -----------------------------------------------------------
+    const getAllowTouchMoveValue = (element) => {
+      const attrValue = element.getAttribute('swiperAllowTouchMove');
+      // If 'false', disable dragging:
+      if (attrValue === 'false') {
+        return false;
+      }
+      // Otherwise (true, default, or NO attribute), enable dragging:
+      return true;
+    };
+
+    // -----------------------------------------------------------
+    // Retrieve attribute values from the DOM
+    // -----------------------------------------------------------
     const directionAttribute = swiperElement.getAttribute('swiperDirection') || defaultDirection;
     const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart') || defaultSlideStart;
     const fillEmptySlotsAttribute =
       swiperElement.getAttribute('swiperFillEmptySlots') || defaultFillEmptySlots.toString();
     const effectAttribute = swiperElement.getAttribute('swiperEffect') || defaultEffect;
-    // NEW: read centeredSlides attribute
     const centeredSlidesAttribute = getBooleanAttributeValue(
       'swiperCenteredSlides',
       defaultCenteredSlides
@@ -173,7 +193,6 @@ function initializeSwipers() {
       ),
     };
 
-    // NEW: slidesPerGroup settings (fixed the mobilePortrait key)
     const slidesPerGroupSettings = {
       desktop: getSlidesPerGroupValue('swiperSlidesPerGroupDesktop'),
       tablet: getSlidesPerGroupValue('swiperSlidesPerGroupTablet'),
@@ -188,7 +207,7 @@ function initializeSwipers() {
       slidesPerViewSettings.mobilePortrait
     );
 
-    // Function to duplicate slides if needed
+    // Duplicate slides if needed to fill space
     const duplicateSlidesToFillSpace = (swiperElement, slidesPerView) => {
       const slideCount = swiperElement.querySelectorAll('.swiper-slide').length;
       const containerWidth = swiperElement.offsetWidth;
@@ -234,12 +253,12 @@ function initializeSwipers() {
     // Inject CSS for marquee effect if needed
     const injectMarqueeCSS = (uniqueClass) => {
       const marqueeStyle = `
-			.${uniqueClass} .swiper-wrapper {
-			  -webkit-transition-timing-function: linear !important;
-			  -o-transition-timing-function: linear !important;
-			  transition-timing-function: linear !important;
-			}
-		  `;
+        .${uniqueClass} .swiper-wrapper {
+          -webkit-transition-timing-function: linear !important;
+          -o-transition-timing-function: linear !important;
+          transition-timing-function: linear !important;
+        }
+      `;
 
       const existingStyleElement = document.getElementById(`marquee-style-${uniqueClass}`);
       if (existingStyleElement) {
@@ -344,7 +363,7 @@ function initializeSwipers() {
     // Prepare effectOptions
     const effectOptions = {};
 
-    // If using coverflow, read the coverflow-related attributes from DOM
+    // If using coverflow, read the coverflow-related attributes
     if (effectValue === 'coverflow') {
       effectOptions.coverflowEffect = {
         rotate: getNumericAttributeValue('swiperEffectCoverflowRotate', 50),
@@ -366,14 +385,16 @@ function initializeSwipers() {
         : false;
     })();
 
-    // Retrieve the freeMode value
     const freeMode = getFreeModeValue('swiperFreeMode', defaultFreeMode);
-
-    // Retrieve the freeModeMomentumBounce value
     const freeModeMomentumBounce = getFreeModeMomentumBounceValue(
       'swiperFreeModeMomentumBounce',
       defaultFreeModeMomentumBounce
     );
+
+    // -----------------------------------------------------------
+    // Retrieve the allowTouchMove value
+    // -----------------------------------------------------------
+    const allowTouchMove = getAllowTouchMoveValue(swiperElement);
 
     // Function to get autoplay configuration
     const getAutoplayConfig = (autoplayValue) => {
@@ -415,20 +436,24 @@ function initializeSwipers() {
       '.swiper-navigation-button.is-standard.is-pause'
     );
 
+    // -----------------------------------------------------------
     // Initialize Swiper
+    // -----------------------------------------------------------
     const swiper = new Swiper(swiperElement, {
       effect: effectValue,
-      ...effectOptions, // <-- Our coverflowEffect options are spread here
+      ...effectOptions, // coverflow, etc.
       slidesPerView: initialSlidesPerView,
-      slidesPerGroup: slidesPerGroupSettings.mobilePortrait, // <-- Use the new attribute for mobile portrait
+      slidesPerGroup: slidesPerGroupSettings.mobilePortrait,
       spaceBetween: spaceBetweenSettings.mobilePortrait,
       speed: speedSettings.mobilePortrait,
       initialSlide: initialSlideIndex,
       freeMode: {
-        enabled: freeMode, // Enabled or disabled based on swiperFreeMode attribute
-        momentumBounce: freeModeMomentumBounce, // Controlled via swiperFreeModeMomentumBounce attribute
+        enabled: freeMode,
+        momentumBounce: freeModeMomentumBounce,
       },
       centeredSlides: centeredSlidesAttribute,
+      // NEW: Use allowTouchMove from our helper:
+      allowTouchMove: allowTouchMove,
       pagination: {
         el: paginationEl,
         type: bulletPaginationEl
@@ -469,7 +494,7 @@ function initializeSwipers() {
       breakpoints: {
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
-          slidesPerGroup: slidesPerGroupSettings.desktop, // <-- Desktop slidesPerGroup
+          slidesPerGroup: slidesPerGroupSettings.desktop,
           spaceBetween: spaceBetweenSettings.desktop,
           speed: speedSettings.desktop,
           autoplay: getAutoplayConfig(autoplaySettings.desktop),
@@ -480,7 +505,7 @@ function initializeSwipers() {
         },
         768: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
-          slidesPerGroup: slidesPerGroupSettings.tablet, // <-- Tablet slidesPerGroup
+          slidesPerGroup: slidesPerGroupSettings.tablet,
           spaceBetween: spaceBetweenSettings.tablet,
           speed: speedSettings.tablet,
           autoplay: getAutoplayConfig(autoplaySettings.tablet),
@@ -491,7 +516,7 @@ function initializeSwipers() {
         },
         480: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
-          slidesPerGroup: slidesPerGroupSettings.mobileLandscape, // <-- Mobile Landscape slidesPerGroup
+          slidesPerGroup: slidesPerGroupSettings.mobileLandscape,
           spaceBetween: spaceBetweenSettings.mobileLandscape,
           speed: speedSettings.mobileLandscape,
           autoplay: getAutoplayConfig(autoplaySettings.mobileLandscape),
@@ -570,7 +595,9 @@ function initializeSwipers() {
       );
     }
 
+    // -----------------------------------------------------------
     // Define the updateNavigationVisibility function
+    // -----------------------------------------------------------
     function updateNavigationVisibility(swiperInstance) {
       const { isLocked } = swiperInstance;
 
@@ -594,7 +621,9 @@ function initializeSwipers() {
       }
     }
 
-    // Existing event listeners for next and previous buttons
+    // -----------------------------------------------------------
+    // Next and Previous buttons
+    // -----------------------------------------------------------
     if (nextButton) {
       nextButton.addEventListener('click', (event) => {
         event.preventDefault();
@@ -611,7 +640,9 @@ function initializeSwipers() {
       });
     }
 
-    // Add event listener for the pause button
+    // -----------------------------------------------------------
+    // Play and Pause buttons
+    // -----------------------------------------------------------
     if (pauseButton) {
       pauseButton.addEventListener('click', (event) => {
         event.preventDefault();
@@ -619,21 +650,22 @@ function initializeSwipers() {
       });
     }
 
-    // Add event listener for the play button
     if (playButton) {
       playButton.addEventListener('click', (event) => {
         event.preventDefault();
         // Enable autoplay in Swiper parameters
         swiper.params.autoplay.enabled = true;
         swiper.autoplay.start();
-        // Introduce a slight delay before advancing to the next slide
+        // Slight delay before advancing to the next slide
         setTimeout(() => {
           swiper.slideNext();
-        }, 50); // Delay in milliseconds
+        }, 50);
       });
     }
 
+    // -----------------------------------------------------------
     // Initialize buttons' disabled state
+    // -----------------------------------------------------------
     const updatePlayPauseButtons = () => {
       if (swiper.autoplay.running) {
         if (playButton) playButton.disabled = true;
@@ -644,19 +676,18 @@ function initializeSwipers() {
       }
     };
 
-    // Initial update of buttons
     updatePlayPauseButtons();
 
-    // Update buttons on autoplay start/stop
     swiper.on('autoplayStart', () => {
       updatePlayPauseButtons();
     });
-
     swiper.on('autoplayStop', () => {
       updatePlayPauseButtons();
     });
 
+    // -----------------------------------------------------------
     // Handle pause on mouse events
+    // -----------------------------------------------------------
     const mouseEnterHandler = () => {
       swiper.autoplay.stop();
       swiper.setTranslate(swiper.translate);
