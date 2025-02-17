@@ -1,5 +1,4 @@
 // this will run after DOMContentLoaded.
-
 function checkRichTextCopied() {
   // if element exists e.g. RichText has already added it.
   if (document.querySelector('[fs-richtext-component]')) {
@@ -15,7 +14,6 @@ function checkRichTextCopied() {
 document.addEventListener('DOMContentLoaded', () => {
   // in the case that the slider was added to the page normally (without RichText).
   initializeSwipers();
-
   checkRichTextCopied();
 });
 
@@ -28,7 +26,7 @@ function initializeSwipers() {
     // -----------------------------------------------------------
     // Set default values for attributes
     // -----------------------------------------------------------
-    const defaultDirection = 'left-to-right';
+    const defaultDirection = 'horizontal'; // DIRECTION UPDATE
     const defaultSlideStart = 'first';
     const defaultFillEmptySlots = true;
     const defaultEffect = 'slide';
@@ -37,9 +35,9 @@ function initializeSwipers() {
     const defaultGrabCursor = true;
     const defaultSpeed = 1000;
     const defaultAutoplayDelay = 5000;
-    const defaultFreeMode = true; // Default value for freeMode
-    const defaultFreeModeMomentumBounce = true; // Default value for freeModeMomentumBounce
-    const defaultCenteredSlides = false; // Default for swiperCenteredSlides
+    const defaultFreeMode = true;
+    const defaultFreeModeMomentumBounce = true;
+    const defaultCenteredSlides = false;
 
     const defaultSlidesPerViewDesktop = 4;
     const defaultSlidesPerViewTablet = 3;
@@ -56,8 +54,6 @@ function initializeSwipers() {
     // -----------------------------------------------------------
     // Helper functions
     // -----------------------------------------------------------
-
-    // (For slidesPerView-like attributes)
     const getSlidesPerViewValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultValue;
@@ -65,7 +61,6 @@ function initializeSwipers() {
       return defaultValue;
     };
 
-    // (For spaceBetween-like attributes)
     const getSpaceBetweenValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultValue;
@@ -73,7 +68,6 @@ function initializeSwipers() {
       return defaultValue;
     };
 
-    // (For speed-like attributes)
     const getSpeedValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultSpeed;
@@ -81,7 +75,6 @@ function initializeSwipers() {
       return defaultSpeed;
     };
 
-    // (For autoplay-like attributes)
     const getAutoplayValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (value === 'false') return false;
@@ -91,7 +84,6 @@ function initializeSwipers() {
       return defaultAutoplayDelay;
     };
 
-    // (For pauseOnMouseEnter-like attributes)
     const getPauseOnMouseEnterValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return false;
@@ -130,7 +122,6 @@ function initializeSwipers() {
       if (value === 'false' || value === '0') {
         return false;
       }
-      // For 'true', 'default', '', null, or any other value, return true
       return true;
     };
 
@@ -139,11 +130,9 @@ function initializeSwipers() {
       if (value === 'false' || value === '0') {
         return false;
       }
-      // For 'true', 'default', '', null, or any other value, return true
       return true;
     };
 
-    // (For slidesPerGroup-like attributes)
     const getSlidesPerGroupValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return 1;
@@ -154,24 +143,38 @@ function initializeSwipers() {
       return 1;
     };
 
-    // -----------------------------------------------------------
-    // NEW: Helper function for swiperAllowTouchMove
-    // -----------------------------------------------------------
     const getAllowTouchMoveValue = (element) => {
       const attrValue = element.getAttribute('swiperAllowTouchMove');
-      // If 'false', disable dragging:
       if (attrValue === 'false') {
         return false;
       }
-      // Otherwise (true, default, or NO attribute), enable dragging:
       return true;
+    };
+
+    const getStringAttributeValue = (attrName, defaultValue) => {
+      const value = swiperElement.getAttribute(attrName);
+      if (!value || value === 'default') return defaultValue;
+      return value;
     };
 
     // -----------------------------------------------------------
     // Retrieve attribute values from the DOM
     // -----------------------------------------------------------
-    const directionAttribute = swiperElement.getAttribute('swiperDirection') || defaultDirection;
-    const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart') || defaultSlideStart;
+    // DIRECTION UPDATE
+    // "horizontal" is default if "vertical" is not specified
+    const directionAttr = (swiperElement.getAttribute('swiperDirection') || '').toLowerCase();
+    let finalDirection = defaultDirection; // "horizontal" by default
+    if (directionAttr === 'vertical') {
+      finalDirection = 'vertical';
+    }
+    // If user sets "horizontal" or "default" or no attribute, it stays "horizontal"
+
+    // REVERSE DIRECTION UPDATE
+    // This is for autoplay, applies whether horizontal or vertical
+    const reverseAttr = swiperElement.getAttribute('swiperReverseDirection');
+    const autoplayReverse = reverseAttr === 'true'; // default false
+
+    const startSlideAttribute = swiperElement.getAttribute('swiperSlideStart') || 'first';
     const fillEmptySlotsAttribute =
       swiperElement.getAttribute('swiperFillEmptySlots') || defaultFillEmptySlots.toString();
     const effectAttribute = swiperElement.getAttribute('swiperEffect') || defaultEffect;
@@ -238,7 +241,6 @@ function initializeSwipers() {
 
     const shouldLoop = getBooleanAttributeValue('swiperLoop', defaultLoop) && enoughSlidesForLoop;
     const shouldRewind = !shouldLoop && getBooleanAttributeValue('swiperRewind', defaultRewind);
-    const isRTL = directionAttribute === 'right-to-left';
 
     let initialSlideIndex = 0;
     if (startSlideAttribute === 'last') {
@@ -322,7 +324,7 @@ function initializeSwipers() {
       mobilePortrait: getPauseOnMouseEnterValue('swiperPauseOnMouseEnterMobilePortrait'),
     };
 
-    const bulletPaginationEl = swiperNavigation.querySelector(
+    const bulletPaginationEl = swiperNavigation?.querySelector(
       '.swiper-pagination.is-bullets.is-standard'
     );
 
@@ -339,13 +341,13 @@ function initializeSwipers() {
           .filter((item) => !defaultBulletClasses.includes(item))
       : [];
 
-    const fractionPaginationEl = swiperNavigation.querySelector(
+    const fractionPaginationEl = swiperNavigation?.querySelector(
       '.swiper-pagination.is-fraction.is-standard'
     );
-    const scrollbarPaginationEl = swiperNavigation.querySelector(
+    const scrollbarPaginationEl = swiperNavigation?.querySelector(
       '.swiper-pagination.swiper-scrollbar.is-standard'
     );
-    const progressPaginationEl = swiperNavigation.querySelector(
+    const progressPaginationEl = swiperNavigation?.querySelector(
       '.swiper-pagination.swiper-pagination-progressbar.is-standard'
     );
 
@@ -362,8 +364,6 @@ function initializeSwipers() {
 
     // Prepare effectOptions
     const effectOptions = {};
-
-    // If using coverflow, read the coverflow-related attributes
     if (effectValue === 'coverflow') {
       effectOptions.coverflowEffect = {
         rotate: getNumericAttributeValue('swiperEffectCoverflowRotate', 50),
@@ -371,7 +371,6 @@ function initializeSwipers() {
         depth: getNumericAttributeValue('swiperEffectCoverflowDepth', 100),
         modifier: getNumericAttributeValue('swiperEffectCoverflowModifier', 1),
         slideShadows: getBooleanAttributeValue('swiperEffectCoverflowSlideShadows', true),
-        // If your Swiper version supports scale in coverflow, enable it here:
         scale: getNumericAttributeValue('swiperEffectCoverflowScale', 1),
       };
     }
@@ -390,14 +389,10 @@ function initializeSwipers() {
       'swiperFreeModeMomentumBounce',
       defaultFreeModeMomentumBounce
     );
-
-    // -----------------------------------------------------------
-    // Retrieve the allowTouchMove value
-    // -----------------------------------------------------------
     const allowTouchMove = getAllowTouchMoveValue(swiperElement);
 
-    // Function to get autoplay configuration
-    const getAutoplayConfig = (autoplayValue) => {
+    // UPDATED to incorporate reverseDirection:
+    function getAutoplayConfig(autoplayValue) {
       if (autoplayValue === false) {
         return false;
       }
@@ -405,7 +400,8 @@ function initializeSwipers() {
         return {
           delay: marqueeSpeed,
           disableOnInteraction: false,
-          reverseDirection: isRTL,
+          // REVERSE DIRECTION UPDATE
+          reverseDirection: autoplayReverse,
           pauseOnMouseEnter: false,
           enabled: true,
         };
@@ -414,34 +410,46 @@ function initializeSwipers() {
         return {
           delay: autoplayValue,
           disableOnInteraction: false,
-          reverseDirection: isRTL,
+          // REVERSE DIRECTION UPDATE
+          reverseDirection: autoplayReverse,
           pauseOnMouseEnter: false,
           enabled: true,
         };
       }
       return false;
-    };
+    }
 
     // Buttons
-    const nextButton = swiperNavigation.querySelector(
+    const nextButton = swiperNavigation?.querySelector(
       '.swiper-navigation-button.is-standard.is-next'
     );
-    const prevButton = swiperNavigation.querySelector(
+    const prevButton = swiperNavigation?.querySelector(
       '.swiper-navigation-button.is-standard.is-prev'
     );
-    const playButton = swiperNavigation.querySelector(
+    const playButton = swiperNavigation?.querySelector(
       '.swiper-navigation-button.is-standard.is-play'
     );
-    const pauseButton = swiperNavigation.querySelector(
+    const pauseButton = swiperNavigation?.querySelector(
       '.swiper-navigation-button.is-standard.is-pause'
     );
+
+    // -----------------------------------------------------------
+    // ACTIVATE OR DEACTIVATE PARALLAX
+    // -----------------------------------------------------------
+    const swiperParallaxAttr = swiperElement.getAttribute('swiperParallax');
+    const parentWantsParallax = swiperParallaxAttr === 'true';
+    const parallaxContainer = swiperElement.querySelector('[swiperParallaxContainer="true"]');
+    const hasParallaxContainer = parallaxContainer !== null;
+    const parallaxEnabled = parentWantsParallax && hasParallaxContainer;
 
     // -----------------------------------------------------------
     // Initialize Swiper
     // -----------------------------------------------------------
     const swiper = new Swiper(swiperElement, {
+      // DIRECTION UPDATE
+      direction: finalDirection, // "horizontal" or "vertical"
       effect: effectValue,
-      ...effectOptions, // coverflow, etc.
+      ...effectOptions,
       slidesPerView: initialSlidesPerView,
       slidesPerGroup: slidesPerGroupSettings.mobilePortrait,
       spaceBetween: spaceBetweenSettings.mobilePortrait,
@@ -452,7 +460,6 @@ function initializeSwipers() {
         momentumBounce: freeModeMomentumBounce,
       },
       centeredSlides: centeredSlidesAttribute,
-      // NEW: Use allowTouchMove from our helper:
       allowTouchMove: allowTouchMove,
       pagination: {
         el: paginationEl,
@@ -491,6 +498,7 @@ function initializeSwipers() {
       loopFillGroupWithBlank: fillEmptySlots,
       rewind: shouldRewind,
       grabCursor: grabCursorSetting,
+      parallax: parallaxEnabled,
       breakpoints: {
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
@@ -529,7 +537,9 @@ function initializeSwipers() {
       on: {
         init: function () {
           if (fractionPaginationEl) {
-            const fractionText = swiperNavigation.querySelector('.swiper-pagination-fraction-text');
+            const fractionText = swiperNavigation?.querySelector(
+              '.swiper-pagination-fraction-text'
+            );
             if (fractionText) {
               fractionText.textContent = `${this.realIndex + 1} / ${this.slides.length}`;
             }
@@ -549,7 +559,9 @@ function initializeSwipers() {
         },
         slideChange: function () {
           if (fractionPaginationEl) {
-            const fractionText = swiperNavigation.querySelector('.swiper-pagination-fraction-text');
+            const fractionText = swiperNavigation?.querySelector(
+              '.swiper-pagination-fraction-text'
+            );
             if (fractionText) {
               fractionText.textContent = `${this.realIndex + 1} / ${this.slides.length}`;
             }
