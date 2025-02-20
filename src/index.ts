@@ -68,6 +68,7 @@ function initializeSwipers() {
     // -----------------------------------------------------------
     // Helper functions
     // -----------------------------------------------------------
+
     const getSlidesPerViewValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultValue;
@@ -82,7 +83,6 @@ function initializeSwipers() {
       return defaultValue;
     };
 
-    // Notice this now uses the possibly-updated `defaultSpeed`.
     const getSpeedValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultSpeed;
@@ -158,9 +158,13 @@ function initializeSwipers() {
       return 1;
     };
 
-    const getAllowTouchMoveValue = (element) => {
-      const attrValue = element.getAttribute('swiperAllowTouchMove');
-      if (attrValue === 'false') {
+    /**
+     * Returns whether touch move is allowed for the given attribute.
+     * If the attribute is "false" or "0", we return `false`. Otherwise `true`.
+     */
+    const getAllowTouchMoveValue = (attrName) => {
+      const value = swiperElement.getAttribute(attrName);
+      if (value === 'false' || value === '0') {
         return false;
       }
       return true;
@@ -336,11 +340,9 @@ function initializeSwipers() {
       mobilePortrait: getPauseOnMouseEnterValue('swiperPauseOnMouseEnterMobilePortrait'),
     };
 
-    // -----------------------------------------------------------
+    // ---------------------------------------------------------------------
     // NEW: Parallax by breakpoint
-    // -----------------------------------------------------------
-    // Each attribute is either "true" or "false" (default false if missing).
-    // Parallax is only enabled if "true" AND the parallax container exists.
+    // ---------------------------------------------------------------------
     const parallaxContainer = swiperElement.querySelector('[swiperParallaxContainer="true"]');
     const hasParallaxContainer = parallaxContainer !== null;
 
@@ -361,9 +363,21 @@ function initializeSwipers() {
       parentWantsParallaxMobileLandscape && hasParallaxContainer;
     const parallaxEnabledMobilePortrait = parentWantsParallaxMobilePortrait && hasParallaxContainer;
 
-    // -----------------------------------------------------------
+    // ---------------------------------------------------------------------
+    // NEW: AllowTouchMove by breakpoint
+    // ---------------------------------------------------------------------
+    const allowTouchMoveDesktop = getAllowTouchMoveValue('swiperAllowTouchMoveDesktop');
+    const allowTouchMoveTablet = getAllowTouchMoveValue('swiperAllowTouchMoveTablet');
+    const allowTouchMoveMobileLandscape = getAllowTouchMoveValue(
+      'swiperAllowTouchMoveMobileLandscape'
+    );
+    const allowTouchMoveMobilePortrait = getAllowTouchMoveValue(
+      'swiperAllowTouchMoveMobilePortrait'
+    );
+
+    // ---------------------------------------------------------------------
     // Determine the effect
-    // -----------------------------------------------------------
+    // ---------------------------------------------------------------------
     let effectValue = defaultEffect;
     if (effectAttribute && !['none', '0', '', 'default', 'slide'].includes(effectAttribute)) {
       effectValue = effectAttribute;
@@ -387,19 +401,14 @@ function initializeSwipers() {
 
     const initialSlidesPerView = requiresSingleSlide ? 1 : slidesPerViewSettings.mobilePortrait;
 
-    const grabCursorSetting = (() => {
-      const value = swiperElement.getAttribute('swiperGrabCursor');
-      return value === null || value === 'default' || value === 'true' || value === ''
-        ? true
-        : false;
-    })();
+    // We won't rely on a single global allowTouchMove value, but we do want a "base" for < 480px:
+    const allowTouchMoveBase = allowTouchMoveMobilePortrait;
 
     const freeMode = getFreeModeValue('swiperFreeMode', defaultFreeMode);
     const freeModeMomentumBounce = getFreeModeMomentumBounceValue(
       'swiperFreeModeMomentumBounce',
       defaultFreeModeMomentumBounce
     );
-    const allowTouchMove = getAllowTouchMoveValue(swiperElement);
 
     // UPDATED to incorporate reverseDirection:
     function getAutoplayConfig(autoplayValue) {
@@ -410,7 +419,6 @@ function initializeSwipers() {
         return {
           delay: marqueeSpeed,
           disableOnInteraction: false,
-          // REVERSE DIRECTION UPDATE
           reverseDirection: autoplayReverse,
           pauseOnMouseEnter: false,
           enabled: true,
@@ -420,7 +428,6 @@ function initializeSwipers() {
         return {
           delay: autoplayValue,
           disableOnInteraction: false,
-          // REVERSE DIRECTION UPDATE
           reverseDirection: autoplayReverse,
           pauseOnMouseEnter: false,
           enabled: true,
@@ -490,7 +497,9 @@ function initializeSwipers() {
         momentumBounce: freeModeMomentumBounce,
       },
       centeredSlides: centeredSlidesAttribute,
-      allowTouchMove: allowTouchMove,
+      // Base: For < 480px
+      allowTouchMove: allowTouchMoveBase,
+
       pagination: {
         el: paginationEl,
         type: bulletPaginationEl
@@ -527,12 +536,13 @@ function initializeSwipers() {
       loop: shouldLoop,
       loopFillGroupWithBlank: fillEmptySlots,
       rewind: shouldRewind,
-      grabCursor: grabCursorSetting,
+      grabCursor: defaultGrabCursor,
 
-      // NEW: parallax setting for mobilePortrait
+      // Parallax for mobilePortrait by default
       parallax: parallaxEnabledMobilePortrait,
 
       breakpoints: {
+        // Desktop: >= 992
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
           slidesPerGroup: slidesPerGroupSettings.desktop,
@@ -543,10 +553,10 @@ function initializeSwipers() {
             dynamicBullets: dynamicBulletsSettings.desktop,
           },
           centeredSlides: centeredSlidesAttribute,
-
-          // NEW: parallax setting for desktop
           parallax: parallaxEnabledDesktop,
+          allowTouchMove: allowTouchMoveDesktop,
         },
+        // Tablet: >= 768
         768: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
           slidesPerGroup: slidesPerGroupSettings.tablet,
@@ -557,10 +567,10 @@ function initializeSwipers() {
             dynamicBullets: dynamicBulletsSettings.tablet,
           },
           centeredSlides: centeredSlidesAttribute,
-
-          // NEW: parallax setting for tablet
           parallax: parallaxEnabledTablet,
+          allowTouchMove: allowTouchMoveTablet,
         },
+        // Mobile Landscape: >= 480
         480: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
           slidesPerGroup: slidesPerGroupSettings.mobileLandscape,
@@ -571,9 +581,8 @@ function initializeSwipers() {
             dynamicBullets: dynamicBulletsSettings.mobileLandscape,
           },
           centeredSlides: centeredSlidesAttribute,
-
-          // NEW: parallax setting for mobileLandscape
           parallax: parallaxEnabledMobileLandscape,
+          allowTouchMove: allowTouchMoveMobileLandscape,
         },
       },
       on: {
