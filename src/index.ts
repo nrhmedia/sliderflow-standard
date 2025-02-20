@@ -26,6 +26,21 @@ function initializeSwipers() {
     // -----------------------------------------------------------
     // Set default values for attributes
     // -----------------------------------------------------------
+
+    // 1) Check if any swiperAutoplay* attribute is set to "marquee"
+    //    If so, default speed becomes 5000 for all breakpoints.
+    let defaultSpeed = 1000;
+    const anyMarquee =
+      swiperElement.getAttribute('swiperAutoplayDesktop') === 'marquee' ||
+      swiperElement.getAttribute('swiperAutoplayTablet') === 'marquee' ||
+      swiperElement.getAttribute('swiperAutoplayMobileLandscape') === 'marquee' ||
+      swiperElement.getAttribute('swiperAutoplayMobilePortrait') === 'marquee';
+
+    if (anyMarquee) {
+      defaultSpeed = 5000;
+    }
+
+    // Other defaults remain the same
     const defaultDirection = 'horizontal'; // DIRECTION UPDATE
     const defaultSlideStart = 'first';
     const defaultFillEmptySlots = true;
@@ -33,7 +48,6 @@ function initializeSwipers() {
     const defaultRewind = true;
     const defaultLoop = false;
     const defaultGrabCursor = true;
-    const defaultSpeed = 1000;
     const defaultAutoplayDelay = 5000;
     const defaultFreeMode = true;
     const defaultFreeModeMomentumBounce = true;
@@ -68,6 +82,7 @@ function initializeSwipers() {
       return defaultValue;
     };
 
+    // Notice this now uses the possibly-updated `defaultSpeed`.
     const getSpeedValue = (attr) => {
       const value = swiperElement.getAttribute(attr);
       if (!value || value === 'default') return defaultSpeed;
@@ -161,16 +176,13 @@ function initializeSwipers() {
     // Retrieve attribute values from the DOM
     // -----------------------------------------------------------
     // DIRECTION UPDATE
-    // "horizontal" is default if "vertical" is not specified
     const directionAttr = (swiperElement.getAttribute('swiperDirection') || '').toLowerCase();
     let finalDirection = defaultDirection; // "horizontal" by default
     if (directionAttr === 'vertical') {
       finalDirection = 'vertical';
     }
-    // If user sets "horizontal" or "default" or no attribute, it stays "horizontal"
 
     // REVERSE DIRECTION UPDATE
-    // This is for autoplay, applies whether horizontal or vertical
     const reverseAttr = swiperElement.getAttribute('swiperReverseDirection');
     const autoplayReverse = reverseAttr === 'true'; // default false
 
@@ -324,36 +336,34 @@ function initializeSwipers() {
       mobilePortrait: getPauseOnMouseEnterValue('swiperPauseOnMouseEnterMobilePortrait'),
     };
 
-    const bulletPaginationEl = swiperNavigation?.querySelector(
-      '.swiper-pagination.is-bullets.is-standard'
+    // -----------------------------------------------------------
+    // NEW: Parallax by breakpoint
+    // -----------------------------------------------------------
+    // Each attribute is either "true" or "false" (default false if missing).
+    // Parallax is only enabled if "true" AND the parallax container exists.
+    const parallaxContainer = swiperElement.querySelector('[swiperParallaxContainer="true"]');
+    const hasParallaxContainer = parallaxContainer !== null;
+
+    const parentWantsParallaxDesktop = getBooleanAttributeValue('swiperParallaxDesktop', false);
+    const parentWantsParallaxTablet = getBooleanAttributeValue('swiperParallaxTablet', false);
+    const parentWantsParallaxMobileLandscape = getBooleanAttributeValue(
+      'swiperParallaxMobileLandscape',
+      false
+    );
+    const parentWantsParallaxMobilePortrait = getBooleanAttributeValue(
+      'swiperParallaxMobilePortrait',
+      false
     );
 
-    const defaultBulletClasses = [
-      'swiper-pagination-bullet',
-      'swiper-bullet-default',
-      'is-standard',
-      'swiper-pagination-bullet-active',
-    ];
+    const parallaxEnabledDesktop = parentWantsParallaxDesktop && hasParallaxContainer;
+    const parallaxEnabledTablet = parentWantsParallaxTablet && hasParallaxContainer;
+    const parallaxEnabledMobileLandscape =
+      parentWantsParallaxMobileLandscape && hasParallaxContainer;
+    const parallaxEnabledMobilePortrait = parentWantsParallaxMobilePortrait && hasParallaxContainer;
 
-    const extraBulletClasses = bulletPaginationEl
-      ? Array.from(bulletPaginationEl.children)
-          .flatMap((child) => Array.from(child.classList))
-          .filter((item) => !defaultBulletClasses.includes(item))
-      : [];
-
-    const fractionPaginationEl = swiperNavigation?.querySelector(
-      '.swiper-pagination.is-fraction.is-standard'
-    );
-    const scrollbarPaginationEl = swiperNavigation?.querySelector(
-      '.swiper-pagination.swiper-scrollbar.is-standard'
-    );
-    const progressPaginationEl = swiperNavigation?.querySelector(
-      '.swiper-pagination.swiper-pagination-progressbar.is-standard'
-    );
-
-    const paginationEl =
-      bulletPaginationEl || fractionPaginationEl || progressPaginationEl || scrollbarPaginationEl;
-
+    // -----------------------------------------------------------
+    // Determine the effect
+    // -----------------------------------------------------------
     let effectValue = defaultEffect;
     if (effectAttribute && !['none', '0', '', 'default', 'slide'].includes(effectAttribute)) {
       effectValue = effectAttribute;
@@ -433,20 +443,40 @@ function initializeSwipers() {
       '.swiper-navigation-button.is-standard.is-pause'
     );
 
-    // -----------------------------------------------------------
-    // ACTIVATE OR DEACTIVATE PARALLAX
-    // -----------------------------------------------------------
-    const swiperParallaxAttr = swiperElement.getAttribute('swiperParallax');
-    const parentWantsParallax = swiperParallaxAttr === 'true';
-    const parallaxContainer = swiperElement.querySelector('[swiperParallaxContainer="true"]');
-    const hasParallaxContainer = parallaxContainer !== null;
-    const parallaxEnabled = parentWantsParallax && hasParallaxContainer;
+    const bulletPaginationEl = swiperNavigation?.querySelector(
+      '.swiper-pagination.is-bullets.is-standard'
+    );
+
+    const defaultBulletClasses = [
+      'swiper-pagination-bullet',
+      'swiper-bullet-default',
+      'is-standard',
+      'swiper-pagination-bullet-active',
+    ];
+
+    const extraBulletClasses = bulletPaginationEl
+      ? Array.from(bulletPaginationEl.children)
+          .flatMap((child) => Array.from(child.classList))
+          .filter((item) => !defaultBulletClasses.includes(item))
+      : [];
+
+    const fractionPaginationEl = swiperNavigation?.querySelector(
+      '.swiper-pagination.is-fraction.is-standard'
+    );
+    const scrollbarPaginationEl = swiperNavigation?.querySelector(
+      '.swiper-pagination.swiper-scrollbar.is-standard'
+    );
+    const progressPaginationEl = swiperNavigation?.querySelector(
+      '.swiper-pagination.swiper-pagination-progressbar.is-standard'
+    );
+
+    const paginationEl =
+      bulletPaginationEl || fractionPaginationEl || progressPaginationEl || scrollbarPaginationEl;
 
     // -----------------------------------------------------------
     // Initialize Swiper
     // -----------------------------------------------------------
     const swiper = new Swiper(swiperElement, {
-      // DIRECTION UPDATE
       direction: finalDirection, // "horizontal" or "vertical"
       effect: effectValue,
       ...effectOptions,
@@ -498,7 +528,10 @@ function initializeSwipers() {
       loopFillGroupWithBlank: fillEmptySlots,
       rewind: shouldRewind,
       grabCursor: grabCursorSetting,
-      parallax: parallaxEnabled,
+
+      // NEW: parallax setting for mobilePortrait
+      parallax: parallaxEnabledMobilePortrait,
+
       breakpoints: {
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
@@ -510,6 +543,9 @@ function initializeSwipers() {
             dynamicBullets: dynamicBulletsSettings.desktop,
           },
           centeredSlides: centeredSlidesAttribute,
+
+          // NEW: parallax setting for desktop
+          parallax: parallaxEnabledDesktop,
         },
         768: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.tablet,
@@ -521,6 +557,9 @@ function initializeSwipers() {
             dynamicBullets: dynamicBulletsSettings.tablet,
           },
           centeredSlides: centeredSlidesAttribute,
+
+          // NEW: parallax setting for tablet
+          parallax: parallaxEnabledTablet,
         },
         480: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.mobileLandscape,
@@ -532,6 +571,9 @@ function initializeSwipers() {
             dynamicBullets: dynamicBulletsSettings.mobileLandscape,
           },
           centeredSlides: centeredSlidesAttribute,
+
+          // NEW: parallax setting for mobileLandscape
+          parallax: parallaxEnabledMobileLandscape,
         },
       },
       on: {
