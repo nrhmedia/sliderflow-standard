@@ -671,7 +671,7 @@ function initializeSwipers() {
           this.params.loop = false;
           this.update();
         },
-        // Updated: Restore loop setting based on the current breakpoint rather than defaulting to mobile portrait.
+        // Updated: Restore loop setting based on the current breakpoint.
         scrollbarDragEnd: function () {
           let loopSetting;
           const bp = this.currentBreakpoint;
@@ -816,16 +816,19 @@ function initializeSwipers() {
   });
 }
 
-// Listen for Webflow tab clicks to force a full update on each Swiper instance.
+// Listen for Webflow tab clicks to fully destroy and reinitialize Swiper instances.
 document.addEventListener('click', function (e) {
   const tabLink = e.target.closest('.w-tab-link');
   if (tabLink) {
     setTimeout(function () {
+      // Destroy all existing swiper instances.
       document.querySelectorAll('.swiper.is-standard').forEach((swiperElement) => {
         if (swiperElement.swiper) {
-          updateSwiperAfterVisible(swiperElement.swiper);
+          swiperElement.swiper.destroy(true, true);
         }
       });
+      // Reinitialize swipers completely.
+      initializeSwipers();
     }, 150);
   }
 });
