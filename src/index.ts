@@ -93,9 +93,9 @@ function initializeSwipers() {
     const defaultFreeModeMomentumBounce = true;
     const defaultCenteredSlides = false;
     const defaultSlidesPerViewDesktop = 4;
-    const defaultSlidesPerViewTablet = 3;
-    const defaultSlidesPerViewMobileLandscape = 2;
-    const defaultSlidesPerViewMobilePortrait = 1;
+    const defaultSlidesPerViewTablet = 4;
+    const defaultSlidesPerViewMobileLandscape = 4;
+    const defaultSlidesPerViewMobilePortrait = 4;
     const defaultSpaceBetweenDesktop = 16;
     const defaultSpaceBetweenTablet = 12;
     const defaultSpaceBetweenMobileLandscape = 8;
