@@ -419,6 +419,16 @@ function initializeSwipers() {
     );
 
     // ---------------------------------------------------------------------
+    // NEW: Sticky by breakpoint
+    // ---------------------------------------------------------------------
+    const stickySettings = {
+      desktop: getBooleanAttributeValue('swiperStickyDesktop', true),
+      tablet: getBooleanAttributeValue('swiperStickyTablet', true),
+      mobileLandscape: getBooleanAttributeValue('swiperStickyMobileLandscape', true),
+      mobilePortrait: getBooleanAttributeValue('swiperStickyMobilePortrait', true),
+    };
+
+    // ---------------------------------------------------------------------
     // Determine the effect
     // ---------------------------------------------------------------------
     let effectValue = defaultEffect;
@@ -521,6 +531,7 @@ function initializeSwipers() {
       freeMode: {
         enabled: freeModeSettings.mobilePortrait,
         momentumBounce: freeModeMomentumBounce,
+        sticky: stickySettings.mobilePortrait, // enable snapping in freeMode
       },
       centeredSlides: centeredSlidesSettings.mobilePortrait,
       grabCursor: grabCursorSettings.mobilePortrait,
@@ -581,6 +592,7 @@ function initializeSwipers() {
           freeMode: {
             enabled: freeModeSettings.desktop,
             momentumBounce: freeModeMomentumBounce,
+            sticky: stickySettings.desktop, // enable snapping in freeMode
           },
           centeredSlides: centeredSlidesSettings.desktop,
           parallax: parallaxEnabledDesktop,
@@ -598,6 +610,7 @@ function initializeSwipers() {
           freeMode: {
             enabled: freeModeSettings.tablet,
             momentumBounce: freeModeMomentumBounce,
+            sticky: stickySettings.tablet, // enable snapping in freeMode
           },
           centeredSlides: centeredSlidesSettings.tablet,
           parallax: parallaxEnabledTablet,
@@ -615,6 +628,7 @@ function initializeSwipers() {
           freeMode: {
             enabled: freeModeSettings.mobileLandscape,
             momentumBounce: freeModeMomentumBounce,
+            sticky: stickySettings.mobileLandscape, // enable snapping in freeMode
           },
           centeredSlides: centeredSlidesSettings.mobileLandscape,
           parallax: parallaxEnabledMobileLandscape,
