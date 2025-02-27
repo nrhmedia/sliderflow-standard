@@ -29,12 +29,10 @@ function updateSwiperAfterVisible(swiperInstance) {
   swiperInstance.slideTo(swiperInstance.realIndex, 0, false);
 }
 
-// this will run after DOMContentLoaded.
+// Helper: Check if Finsweet RichText is present, then reinitialize swipers.
 function checkRichTextCopied() {
-  // If Finsweet RichText has been added.
   if (document.querySelector('[fs-richtext-component]')) {
     initializeSwipers();
-    // After Rich Text loads, wait a moment then force update on all swipers.
     setTimeout(function () {
       document.querySelectorAll('.swiper.is-standard').forEach((swiperElement) => {
         if (swiperElement.swiper) {
@@ -49,11 +47,19 @@ function checkRichTextCopied() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize swipers if loaded normally.
-  initializeSwipers();
-  checkRichTextCopied();
-});
+// Helper: Force duplicate slides until total count is greater than minSlides.
+function forceCloneSlides(swiperElement, minSlides) {
+  const swiperWrapper = swiperElement.querySelector('.swiper-wrapper');
+  const slideCount = swiperElement.querySelectorAll('.swiper-slide').length;
+  if (slideCount <= minSlides) {
+    // Calculate how many copies we need so that the new total is > minSlides.
+    const times = Math.ceil((minSlides + 1) / slideCount);
+    const originalContent = swiperWrapper.innerHTML;
+    for (let i = 1; i < times; i++) {
+      swiperWrapper.innerHTML += originalContent;
+    }
+  }
+}
 
 function initializeSwipers() {
   document.querySelectorAll('.swiper.is-standard').forEach((swiperElement, index) => {
@@ -77,7 +83,8 @@ function initializeSwipers() {
       swiperElement.getAttribute('swiperAutoplayDesktop') === 'marquee' ||
       swiperElement.getAttribute('swiperAutoplayTablet') === 'marquee' ||
       swiperElement.getAttribute('swiperAutoplayMobileLandscape') === 'marquee' ||
-      swiperElement.getAttribute('swiperAutoplayMobilePortrait') === 'marquee';
+      swiperElement.getAttribute('swiperAutoplayMobilePortrait') === 'marquee' ||
+      swiperElement.getAttribute('swiperAutoplay') === 'marquee';
     if (anyMarquee) {
       defaultSpeed = 5000;
     }
@@ -103,7 +110,7 @@ function initializeSwipers() {
     const marqueeSpeed = 1;
 
     // -----------------------------------------------------------
-    // Helper functions (omitted here for brevity; they remain unchanged)
+    // Helper functions for value retrieval
     // -----------------------------------------------------------
     const getSlidesPerViewValue = (attr, defaultValue) => {
       const value = swiperElement.getAttribute(attr);
@@ -238,7 +245,7 @@ function initializeSwipers() {
       slidesPerViewSettings.mobilePortrait
     );
 
-    // --- NEW: Breakpoint-specific settings for direction, grabCursor, freeMode, and centeredSlides ---
+    // --- Breakpoint-specific settings for direction, grabCursor, freeMode, and centeredSlides ---
     const directionSettings = {
       desktop: getStringAttributeValue('swiperDirectionDesktop', finalDirection).toLowerCase(),
       tablet: getStringAttributeValue('swiperDirectionTablet', finalDirection).toLowerCase(),
@@ -311,14 +318,29 @@ function initializeSwipers() {
     }
     const updatedTotalSlides = swiperElement.querySelectorAll('.swiper-slide').length;
     const enoughSlidesForLoop = updatedTotalSlides > maxSlidesPerView;
-    const shouldLoop = getBooleanAttributeValue('swiperLoop', defaultLoop) && enoughSlidesForLoop;
-    const shouldRewind = !shouldLoop && getBooleanAttributeValue('swiperRewind', defaultRewind);
-    let initialSlideIndex = 0;
-    if (startSlideAttribute === 'last') {
-      initialSlideIndex = updatedTotalSlides - 1;
-    } else if (!isNaN(startSlideAttribute) && Number(startSlideAttribute) >= 0) {
-      initialSlideIndex = Number(startSlideAttribute);
+
+    // --- Forced Mode Handling ---
+    // Priority:
+    // 1. If swiperLoop="forced" is set, force loop mode (overrides everything).
+    // 2. Otherwise, if swiperRewind="forced" is set, force rewind mode.
+    // 3. Else, use default boolean values.
+    const swiperLoopAttr = swiperElement.getAttribute('swiperLoop');
+    const swiperRewindAttr = swiperElement.getAttribute('swiperRewind');
+    let shouldLoop = false;
+    let shouldRewind = false;
+    if (swiperLoopAttr === 'forced') {
+      shouldLoop = true;
+      // Force duplicate slides until there are more than maxSlidesPerView.
+      forceCloneSlides(swiperElement, maxSlidesPerView);
+    } else if (swiperRewindAttr === 'forced') {
+      shouldRewind = true;
+      // Duplicate slides as needed for forced rewind.
+      forceCloneSlides(swiperElement, maxSlidesPerView);
+    } else {
+      shouldLoop = getBooleanAttributeValue('swiperLoop', defaultLoop) && enoughSlidesForLoop;
+      shouldRewind = getBooleanAttributeValue('swiperRewind', defaultRewind);
     }
+
     const uniqueClass = `swiper-instance-${index}`;
     swiperElement.classList.add(uniqueClass);
 
@@ -344,7 +366,8 @@ function initializeSwipers() {
       swiperElement.getAttribute('swiperAutoplayDesktop') === 'marquee' ||
       swiperElement.getAttribute('swiperAutoplayTablet') === 'marquee' ||
       swiperElement.getAttribute('swiperAutoplayMobileLandscape') === 'marquee' ||
-      swiperElement.getAttribute('swiperAutoplayMobilePortrait') === 'marquee';
+      swiperElement.getAttribute('swiperAutoplayMobilePortrait') === 'marquee' ||
+      swiperElement.getAttribute('swiperAutoplay') === 'marquee';
     if (autoplayMarqueeEnabled) {
       injectMarqueeCSS(uniqueClass);
     }
@@ -371,6 +394,7 @@ function initializeSwipers() {
       tablet: getAutoplayValue('swiperAutoplayTablet'),
       mobileLandscape: getAutoplayValue('swiperAutoplayMobileLandscape'),
       mobilePortrait: getAutoplayValue('swiperAutoplayMobilePortrait'),
+      default: getAutoplayValue('swiperAutoplay'),
     };
     const dynamicBulletsSettings = {
       desktop: getDynamicBulletsValue('swiperDynamicBulletsDesktop'),
@@ -519,7 +543,7 @@ function initializeSwipers() {
     // Initialize Swiper
     // -----------------------------------------------------------
     const swiper = new Swiper(swiperElement, {
-      // Use mobilePortrait settings as the default/base config
+      // Use mobilePortrait settings as the default/base config.
       direction: directionSettings.mobilePortrait,
       effect: effectValue,
       ...effectOptions,
@@ -527,20 +551,17 @@ function initializeSwipers() {
       slidesPerGroup: slidesPerGroupSettings.mobilePortrait,
       spaceBetween: spaceBetweenSettings.mobilePortrait,
       speed: speedSettings.mobilePortrait,
-      initialSlide: initialSlideIndex,
+      initialSlide: Number(startSlideAttribute) || 0,
       freeMode: {
         enabled: freeModeSettings.mobilePortrait,
         momentumBounce: freeModeMomentumBounce,
-        sticky: stickySettings.mobilePortrait, // enable snapping in freeMode
+        sticky: stickySettings.mobilePortrait,
       },
       centeredSlides: centeredSlidesSettings.mobilePortrait,
       grabCursor: grabCursorSettings.mobilePortrait,
       allowTouchMove: allowTouchMoveBase,
-
-      // --- NEW: Observe changes so update occurs on tab switch ---
       observer: true,
       observeParents: true,
-
       pagination: {
         el: paginationEl,
         type: bulletPaginationEl
@@ -571,28 +592,28 @@ function initializeSwipers() {
         snapOnRelease: false,
         dragSize: 'auto',
       },
-      autoplay: getAutoplayConfig(autoplaySettings.mobilePortrait),
+      autoplay:
+        getAutoplayConfig(autoplaySettings.mobilePortrait) ||
+        getAutoplayConfig(autoplaySettings.default),
       loop: shouldLoop,
       loopFillGroupWithBlank: fillEmptySlots,
       rewind: shouldRewind,
-
-      // -----------------------------------------------------------
-      // Breakpoints with override settings
-      // -----------------------------------------------------------
       breakpoints: {
         992: {
           slidesPerView: requiresSingleSlide ? 1 : slidesPerViewSettings.desktop,
           slidesPerGroup: slidesPerGroupSettings.desktop,
           spaceBetween: spaceBetweenSettings.desktop,
           speed: speedSettings.desktop,
-          autoplay: getAutoplayConfig(autoplaySettings.desktop),
+          autoplay:
+            getAutoplayConfig(autoplaySettings.desktop) ||
+            getAutoplayConfig(autoplaySettings.default),
           pagination: { dynamicBullets: dynamicBulletsSettings.desktop },
           direction: directionSettings.desktop,
           grabCursor: grabCursorSettings.desktop,
           freeMode: {
             enabled: freeModeSettings.desktop,
             momentumBounce: freeModeMomentumBounce,
-            sticky: stickySettings.desktop, // enable snapping in freeMode
+            sticky: stickySettings.desktop,
           },
           centeredSlides: centeredSlidesSettings.desktop,
           parallax: parallaxEnabledDesktop,
@@ -603,14 +624,16 @@ function initializeSwipers() {
           slidesPerGroup: slidesPerGroupSettings.tablet,
           spaceBetween: spaceBetweenSettings.tablet,
           speed: speedSettings.tablet,
-          autoplay: getAutoplayConfig(autoplaySettings.tablet),
+          autoplay:
+            getAutoplayConfig(autoplaySettings.tablet) ||
+            getAutoplayConfig(autoplaySettings.default),
           pagination: { dynamicBullets: dynamicBulletsSettings.tablet },
           direction: directionSettings.tablet,
           grabCursor: grabCursorSettings.tablet,
           freeMode: {
             enabled: freeModeSettings.tablet,
             momentumBounce: freeModeMomentumBounce,
-            sticky: stickySettings.tablet, // enable snapping in freeMode
+            sticky: stickySettings.tablet,
           },
           centeredSlides: centeredSlidesSettings.tablet,
           parallax: parallaxEnabledTablet,
@@ -621,14 +644,16 @@ function initializeSwipers() {
           slidesPerGroup: slidesPerGroupSettings.mobileLandscape,
           spaceBetween: spaceBetweenSettings.mobileLandscape,
           speed: speedSettings.mobileLandscape,
-          autoplay: getAutoplayConfig(autoplaySettings.mobileLandscape),
+          autoplay:
+            getAutoplayConfig(autoplaySettings.mobileLandscape) ||
+            getAutoplayConfig(autoplaySettings.default),
           pagination: { dynamicBullets: dynamicBulletsSettings.mobileLandscape },
           direction: directionSettings.mobileLandscape,
           grabCursor: grabCursorSettings.mobileLandscape,
           freeMode: {
             enabled: freeModeSettings.mobileLandscape,
             momentumBounce: freeModeMomentumBounce,
-            sticky: stickySettings.mobileLandscape, // enable snapping in freeMode
+            sticky: stickySettings.mobileLandscape,
           },
           centeredSlides: centeredSlidesSettings.mobileLandscape,
           parallax: parallaxEnabledMobileLandscape,
@@ -655,6 +680,13 @@ function initializeSwipers() {
             }
           }
           updateNavigationVisibility(this);
+          // For marquee autoplay, add a slight delay before updating and starting autoplay.
+          if (autoplayMarqueeEnabled) {
+            setTimeout(() => {
+              this.update();
+              this.autoplay.start();
+            }, 1000);
+          }
         },
         slideChange: function () {
           if (fractionPaginationEl) {
@@ -685,7 +717,6 @@ function initializeSwipers() {
           this.params.loop = false;
           this.update();
         },
-        // Updated: Restore loop setting based on the current breakpoint.
         scrollbarDragEnd: function () {
           let loopSetting;
           const bp = this.currentBreakpoint;
@@ -710,7 +741,6 @@ function initializeSwipers() {
               getBooleanAttributeValue('swiperLoop', defaultLoop)
             );
           }
-          // Only loop if there are enough slides.
           this.params.loop = loopSetting && enoughSlidesForLoop;
           this.update();
           this.autoplay.start();
@@ -731,24 +761,22 @@ function initializeSwipers() {
     }
 
     function updateNavigationVisibility(swiperInstance) {
-      const { isLocked } = swiperInstance;
-      if (nextButton) {
-        nextButton.style.display = isLocked ? 'none' : '';
-      }
-      if (prevButton) {
-        prevButton.style.display = isLocked ? 'none' : '';
-      }
-      if (playButton) {
-        playButton.style.display = isLocked ? 'none' : '';
-      }
-      if (pauseButton) {
-        pauseButton.style.display = isLocked ? 'none' : '';
-      }
-      if (fractionPaginationEl) {
-        fractionPaginationEl.style.display = isLocked ? 'none' : '';
-      }
-      if (progressPaginationEl) {
-        progressPaginationEl.style.display = isLocked ? 'none' : '';
+      const forcedLoop = swiperInstance.el.getAttribute('swiperLoop') === 'forced';
+      if (forcedLoop) {
+        if (nextButton) nextButton.style.display = '';
+        if (prevButton) prevButton.style.display = '';
+        if (playButton) playButton.style.display = '';
+        if (pauseButton) pauseButton.style.display = '';
+        if (fractionPaginationEl) fractionPaginationEl.style.display = '';
+        if (progressPaginationEl) progressPaginationEl.style.display = '';
+      } else {
+        const { isLocked } = swiperInstance;
+        if (nextButton) nextButton.style.display = isLocked ? 'none' : '';
+        if (prevButton) prevButton.style.display = isLocked ? 'none' : '';
+        if (playButton) playButton.style.display = isLocked ? 'none' : '';
+        if (pauseButton) pauseButton.style.display = isLocked ? 'none' : '';
+        if (fractionPaginationEl) fractionPaginationEl.style.display = isLocked ? 'none' : '';
+        if (progressPaginationEl) progressPaginationEl.style.display = isLocked ? 'none' : '';
       }
     }
 
@@ -828,21 +856,39 @@ function initializeSwipers() {
       handlePauseOnMouseEvents();
     });
   });
+
+  // Global extra delay: for dynamic (CMS-generated) content,
+  // wait a bit longer then update & restart autoplay for marquee swipers.
+  setTimeout(() => {
+    document.querySelectorAll('.swiper.is-standard').forEach((swiperElement) => {
+      if (swiperElement.swiper) {
+        const autoplayAttr = swiperElement.getAttribute('swiperAutoplay') || '';
+        if (autoplayAttr === 'marquee') {
+          swiperElement.swiper.update();
+          swiperElement.swiper.autoplay.start();
+        }
+      }
+    });
+  }, 1500);
 }
 
-// Listen for Webflow tab clicks to fully destroy and reinitialize Swiper instances.
+// Listen for Webflow tab clicks to destroy and reinitialize swipers.
 document.addEventListener('click', function (e) {
   const tabLink = e.target.closest('.w-tab-link');
   if (tabLink) {
     setTimeout(function () {
-      // Destroy all existing swiper instances.
       document.querySelectorAll('.swiper.is-standard').forEach((swiperElement) => {
         if (swiperElement.swiper) {
           swiperElement.swiper.destroy(true, true);
         }
       });
-      // Reinitialize swipers completely.
       initializeSwipers();
     }, 150);
   }
+});
+
+// DOMContentLoaded handler
+document.addEventListener('DOMContentLoaded', () => {
+  initializeSwipers();
+  checkRichTextCopied();
 });
